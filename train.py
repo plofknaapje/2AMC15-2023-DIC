@@ -18,7 +18,6 @@ try:
     from agents.null_agent import NullAgent
     from agents.random_agent import RandomAgent
     from agents.value_agent import ValueAgent
-    from agents.QLearn_agent import QLearnAgent
     from world import Environment
 except ModuleNotFoundError:
     import sys
@@ -108,7 +107,6 @@ def main(
             # GreedyAgent(0),
             # RandomAgent(0),
             # ValueAgent(0, gamma=0.9)
-            QLearnAgent(0, gamma=0.9)
         ]
 
         # Iterate through each agent for `iters` iterations
