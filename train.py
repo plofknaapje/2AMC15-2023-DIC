@@ -72,7 +72,7 @@ def parse_args():
         default=0,
         help="Random seed value for the environment.",
     )
-    p.add_argument("--out", type=Path, help="Where to save training results.")
+    p.add_argument("--out", type=Path, default=Path("results/"), help="Where to save training results.")
 
     return p.parse_args()
 
