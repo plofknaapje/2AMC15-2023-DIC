@@ -2,6 +2,7 @@
 
 This is an agent that takes a random action from the available action space.
 """
+import random
 from random import randint
 import numpy as np
 import math
@@ -31,22 +32,96 @@ class QLearnAgent(BaseAgent):
     def process_reward(self, observation: np.ndarray, reward: float):
         pass
 
+    def take_action(self, observation: np.ndarray, info: None | dict) -> int:
+
+        # TODO: How to initialize the Q table
+        if self.Q is None:
+            print('Initializing Q')
+            self.Q = np.zeros([observation.shape[0], observation.shape[1], 2 ** 4, 4])
+            self.Q[:, 0, :, :] = -1000000  # first column we don't want to visit
+            self.Q[:, -1, :, :] = -1000000  # last column we don't want to visit
+            self.Q[0, :, :, :] = -1000000  # first row we don't want to visit
+            self.Q[-1, :, :, :] = -1000000  # last row we don't want to visit
+
+            # also set all values for inner walls to low values
+            indices_walls = np.argwhere(observation == 2)
+            for idx in indices_walls:
+                self.Q[idx[0], idx[1], :, :] = -1000000
+
+            # also set values for dirt already high
+            indices_dirt = np.argwhere(observation == 3)
+            for idx in indices_dirt:
+                self.Q[idx[0], idx[1], :, :] = 5000
+
+        # TODO: Store state somewhere, so don't need to recompute it
+        state = []
+        state.append(info['agent_pos'][0][0])
+        state.append(info['agent_pos'][0][1])
+        state.append(self.dirt_function(observation, state))
+
+        # take action according to epsilon greedy
+        try:
+            iteration = info['iteration']
+            epsilon_decay = self.epsilon * (1-iteration)
+        # If in evaluation no iteration can be found
+        except:
+            epsilon_decay = 0
+
+        if np.random.uniform(0, 1) < epsilon_decay:
+            # action = np.random.randint(0, 4)
+            action = self.get_action(state, observation)
+        else:
+            action = np.argmax(self.Q[state[0], state[1], state[2], :])
+
+        # new state
+        new_state = self.get_new_state(observation, action, state)
+
+        # compute reward
+        reward = self.reward_func(observation, new_state)
+
+        # update the Q function
+        self.Q[state[0], state[1], state[2], action] += \
+            self.alpha * (reward + self.gamma * np.max(self.Q[new_state[0], new_state[1], new_state[2], :]) -
+                          self.Q[state[0], state[1], state[2], action])
+
+        return action
+
+    def get_action(self, state, observation):
+        valid_moves = []
+
+        if observation[state[0]][state[1]+1] not in [1, 2]: # down
+            valid_moves.append(0)
+
+        if observation[state[0]][state[1]-1] not in [1, 2]: # up
+            valid_moves.append(1)
+
+        if observation[state[0]-1][state[1]] not in [1, 2]: # left
+            valid_moves.append(2)
+
+        if observation[state[0]+1][state[1]] not in [1, 2]: # right
+            valid_moves.append(3)
+
+        action = random.choice(valid_moves)
+
+        return action
+
+
     def reward_func(self, observation, state):
         if observation[state[0], state[1]] in [1, 2]:
             return -1000
 
         if state[2] != 15:
             if observation[state[0], state[1]] == 3:
-                return 5
+                return 500
             else:
-                return 0
+                return -1
         else:
             if observation[state[0], state[1]] == 4:
                 return 50
             else:
-                return 0
+                return -1
 
-    def get_new_pos(self, observation, action, state):
+    def get_new_state(self, observation, action, state):
         action_map = {0: [state[0], state[1] - 1, state[2]],  # down
                       1: [state[0], state[1] + 1, state[2]],  # up
                       2: [state[0] - 1, state[1], state[2]],  # left
@@ -54,16 +129,17 @@ class QLearnAgent(BaseAgent):
                       }
         new_state = action_map.get(action, state)
 
+        state[2] = self.dirt_function(observation, state)
+
         if observation[new_state[0], new_state[1]] in [1, 2]:
             return state
         else:
             return new_state
 
-    # TODO: Dirt check function
     def dirt_function(self, observation: np.ndarray, state):
         #check which quarter
-        height = observation.shape(0)
-        width = observation.shape(1)
+        height = observation.shape[0]
+        width = observation.shape[1]
         if state[0] < height/2:
             if state[1] < width/2:
                 quarter = 0
@@ -76,8 +152,8 @@ class QLearnAgent(BaseAgent):
                 quarter = 3
 
         #check if already dirt free
-        if self.dirtGrid(quarter) == 1:
-            return dirt_byte_converter(self.dirtGrid)
+        if self.dirtGrid[quarter] == 1:
+            return self.dirt_byte_converter(self.dirtGrid)
         
         dirty = False
 
@@ -122,56 +198,22 @@ class QLearnAgent(BaseAgent):
         
         if dirty == False:
             self.dirtGrid[quarter] = 1
-        return dirt_byte_converter(self.dirtGrid)
+        return self.dirt_byte_converter(self.dirtGrid)
 
         #check if there is dirt
         #update dirt 
         
-    def dirt_byte_converter(dirtGrid):
+    def dirt_byte_converter(self, dirt_grid):
         number = 0
-        if dirtGrid[0] == 1:
+        if dirt_grid[0] == 1:
             number += 1
-        if dirtGrid[1] == 1:
+        if dirt_grid[1] == 1:
             number += 2
-        if dirtGrid[2] == 1:
+        if dirt_grid[2] == 1:
             number += 4
-        if dirtGrid[3] == 1:
+        if dirt_grid[3] == 1:
             number += 8
         return number
 
-    # TODO: Get new state to update Q table
-    # TODO: Q learning implementation
-    def take_action(self, observation: np.ndarray, info: None | dict) -> int:
-
-        if self.Q is None:
-            self.Q = np.zeros([observation.shape[0], observation.shape[1], 2 ** 4, 4])
-            self.Q[:, 0, :, :] = -10000  # first column we don't want to visit
-            self.Q[:, -1, :, :] = -10000  # last column we don't want to visit
-            self.Q[0, :, :, :] = -10000  # first row we don't want to visit
-            self.Q[-1, :, :, :] = -10000  # last row we don't want to visit
-
-        state = info['agent_pos']
-        print(observation.shape[1])
-
-
-        # take action according to epsilon greedy
-        if np.random.uniform(0, 1) < self.epsilon:
-            action = np.random.randint(0, 4)
-            if state[0]== 1 and action == 0:
-        else:
-            action = np.argmax(self.Q[state[0], state[1], state[2], :])
-
-        # new state
-        new_state = self.get_new_pos(observation, action, state)
-
-        # compute reward
-        reward = self.reward_func(observation, new_state)
-
-        # update the Q function
-        self.Q[state[0], state[1], state[2], action] += \
-            self.alpha * (reward + self.gamma * np.max(self.Q[new_state[0], new_state[1], new_state[2], :]) -
-            self.Q[state[0], state[1], state[2], action])
-
-        return action
 
 

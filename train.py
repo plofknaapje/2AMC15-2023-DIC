@@ -92,7 +92,7 @@ def main(
         # Set up the environment and reset it to its initial state
         env = Environment(
             grid,
-            no_gui,
+            no_gui=True,
             n_agents=1,
             agent_start_pos=None,
             sigma=sigma,
@@ -108,25 +108,30 @@ def main(
             # GreedyAgent(0),
             # RandomAgent(0),
             #ValueAgent(0, gamma=0.9),
-            QLearnAgent(0, gamma=0.9)
+            QLearnAgent(0, gamma=0.9, epsilon=0.9)
         ]
 
         # Iterate through each agent for `iters` iterations
+        TOTAL_ITERATIONS = 100000
+
         for agent in agents:
-            for _ in trange(iters):
-                # Agent takes an action based on the latest observation and info
-                action = agent.take_action(obs, info)
+            for i in range(TOTAL_ITERATIONS):
+                for _ in trange(iters):
+                    # Agent takes an action based on the latest observation and info
+                    info['iteration'] = i/TOTAL_ITERATIONS
+                    action = agent.take_action(obs, info)
 
-                # The action is performed in the environment
-                obs, reward, terminated, info = env.step([action])
+                    # The action is performed in the environment
+                    obs, reward, terminated, info = env.step([action])
 
-                # If the agent is terminated, we reset the env.
-                if terminated:
-                    obs, info, world_stats = env.reset()
-                agent.process_reward(obs, reward)
-            obs, info, world_stats = env.reset()
-            print(world_stats)
+                    # If the agent is terminated, we reset the env.
+                    if terminated:
+                        obs, info, world_stats = env.reset()
+                    agent.process_reward(obs, reward)
+                obs, info, world_stats = env.reset()
+                print(world_stats)
 
+            info['iteration'] = 0
             Environment.evaluate_agent(grid, [agent], 1000, out, 0.2)
 
 
