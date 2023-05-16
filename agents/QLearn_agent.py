@@ -69,9 +69,9 @@ class QLearnAgent(BaseAgent):
             epsilon_decay = 0
             alpha_decay = 0.001
 
+        # TODO: During random moves: Should we train it with bumping into walls or should we avoid it?
         # take action according to epsilon greedy
         if np.random.uniform(0, 1) < epsilon_decay:
-            # action = np.random.randint(0, 4)
             action = self.get_action(state, observation)
         else:
             action = np.argmax(self.Q[state[0], state[1], state[2], :])
@@ -108,7 +108,7 @@ class QLearnAgent(BaseAgent):
 
         return action
 
-
+    # TODO: use environment reward function
     def reward_func(self, observation, state):
         if observation[state[0], state[1]] in [1, 2]:
             return -1000
@@ -139,6 +139,7 @@ class QLearnAgent(BaseAgent):
         else:
             return new_state
 
+    # TODO: make flexible for different segmentations of the grid (give number of segmentations as input)
     def dirt_function(self, observation: np.ndarray, state):
         #check which quarter
         height = observation.shape[0]
