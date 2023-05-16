@@ -10,7 +10,7 @@ from agents import BaseAgent
 
 
 class QLearnAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, theta=0.001, epsilon=0.05, alpha=0.001):
+    def __init__(self, agent_number: int, gamma: float, theta=0.001, epsilon=0.5, alpha=0.4):
         """
         Set agent parameters.
 
@@ -59,14 +59,17 @@ class QLearnAgent(BaseAgent):
         state.append(info['agent_pos'][0][1])
         state.append(self.dirt_function(observation, state))
 
-        # take action according to epsilon greedy
+        # Set alpha and epsilon according to iteration
         try:
             iteration = info['iteration']
             epsilon_decay = self.epsilon * (1-iteration)
+            alpha_decay = self.alpha * (1-iteration)
         # If in evaluation no iteration can be found
         except:
             epsilon_decay = 0
+            alpha_decay = 0.001
 
+        # take action according to epsilon greedy
         if np.random.uniform(0, 1) < epsilon_decay:
             # action = np.random.randint(0, 4)
             action = self.get_action(state, observation)
@@ -81,7 +84,7 @@ class QLearnAgent(BaseAgent):
 
         # update the Q function
         self.Q[state[0], state[1], state[2], action] += \
-            self.alpha * (reward + self.gamma * np.max(self.Q[new_state[0], new_state[1], new_state[2], :]) -
+            alpha_decay * (reward + self.gamma * np.max(self.Q[new_state[0], new_state[1], new_state[2], :]) -
                           self.Q[state[0], state[1], state[2], action])
 
         return action
