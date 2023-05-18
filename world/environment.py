@@ -107,7 +107,7 @@ class Environment:
         # Set up reward function
         if reward_fn is None:
             warn("No reward function provided. Using default reward.")
-            self.reward_fn = self._default_reward_function
+            self.reward_fn = self._custom_reward_function
         else:
             self.reward_fn = self._custom_reward_function
         self.info = self._reset_info()
@@ -443,10 +443,10 @@ class Environment:
             A single floating point value representing the reward for a given
             action.
         """
-        dirt_reward = sum(info["dirt_cleaned"]) * 5
+        dirt_reward = sum(info["dirt_cleaned"]) * 50
 
         if info["agent_moved"] == [False] and info["agent_charging"][0] != True:
-            bumped_reward = -1
+            bumped_reward = -100
         else:
             bumped_reward = 0
 
@@ -456,7 +456,7 @@ class Environment:
             moving_reward = 0
 
         if grid.sum_dirt() == 0 and info["agent_charging"][0]:
-            charging_reward = 10
+            charging_reward = 100
         elif info["agent_charging"][0]:
             charging_reward = -1
         else:

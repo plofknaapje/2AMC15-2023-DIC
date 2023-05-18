@@ -109,11 +109,11 @@ def main(
             # GreedyAgent(0),
             # RandomAgent(0),
             #ValueAgent(0, gamma=0.9),
-            QLearnAgent(0, gamma=0.9, epsilon=0.9)
+            QLearnAgent(0, gamma=0.99, epsilon=0.9)
         ]
 
         # Iterate through each agent for `iters` iterations
-        TOTAL_ITERATIONS = 1000
+        TOTAL_ITERATIONS = 10000
 
         for agent in agents:
             for i in range(TOTAL_ITERATIONS):
@@ -131,7 +131,7 @@ def main(
                     agent.process_reward(action, reward)
                 obs, info, world_stats = env.reset()
                 print(world_stats)
-
+            print(agent.Q)
             info['iteration'] = 0
             Environment.evaluate_agent(grid, [agent], 1000, out, 0.2)
 
