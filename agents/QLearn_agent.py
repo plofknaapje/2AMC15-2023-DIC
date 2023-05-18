@@ -27,6 +27,8 @@ class QLearnAgent(BaseAgent):
         self.epsilon = epsilon
         self.alpha = alpha
         self.Q = None
+        self.alphas = None
+        self.epsilons = None
         self.dirtGrid = np.zeros(4)
         self.epsilon_decay = epsilon
         self.alpha_decay = alpha
@@ -46,6 +48,8 @@ class QLearnAgent(BaseAgent):
         if self.Q is None:
             print('Initializing Q')
             self.Q = np.zeros([observation.shape[0], observation.shape[1], 2 ** 4, 4])
+            self.epsilons = np.full((observation.shape[0], observation.shape[1]), self.epsilon)
+            self.alphas = np.full((observation.shape[0], observation.shape[1]), self.alpha)
             self.Q[:, 0, :, :] = -1000000  # first column we don't want to visit
             self.Q[:, -1, :, :] = -1000000  # last column we don't want to visit
             self.Q[0, :, :, :] = -1000000  # first row we don't want to visit
@@ -67,9 +71,12 @@ class QLearnAgent(BaseAgent):
 
         # Set alpha and epsilon according to iteration
         try:
-            iteration = info['iteration']
-            self.epsilon_decay = self.epsilon * (1-iteration)
-            self.alpha_decay = self.alpha * (1-iteration)
+            self.epsilon_decay = self.epsilons[self.state[0], self.state[1]] - 0.1
+            if self.epsilon_decay < 0.1:
+                self.epsilon_decay = 0.1
+            self.alpha_decay = self.alphas[self.state[0], self.state[1]] - 0.001
+            if self.alpha_decay < 0.001:
+                self.alpha_decay = 0.001
         # If in evaluation no iteration can be found
         except:
             self.epsilon_decay = 0
