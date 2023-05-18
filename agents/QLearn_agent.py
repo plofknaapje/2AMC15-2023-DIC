@@ -61,7 +61,6 @@ class QLearnAgent(BaseAgent):
             for idx in indices_dirt:
                 self.Q[idx[0], idx[1], :, :] = 5000
 
-        # TODO: Store state somewhere, so don't need to recompute it
         self.state[0] = info['agent_pos'][0][0]
         self.state[1] = info['agent_pos'][0][1]
         self.state[2] = self.dirt_function(observation, self.state)
@@ -79,7 +78,8 @@ class QLearnAgent(BaseAgent):
         # TODO: During random moves: Should we train it with bumping into walls or should we avoid it?
         # take action according to epsilon greedy
         if np.random.uniform(0, 1) < self.epsilon_decay:
-            action = self.get_action(self.state, observation)
+            action = randint(0, 3)
+            #action = self.get_action(self.state, observation)
         else:
             action = np.argmax(self.Q[self.state[0], self.state[1], self.state[2], :])
 
@@ -107,21 +107,6 @@ class QLearnAgent(BaseAgent):
 
         return action
 
-    # TODO: use environment reward function
-    def reward_func(self, observation, state):
-        if observation[state[0], state[1]] in [1, 2]:
-            return -1000
-
-        if state[2] != 15:
-            if observation[state[0], state[1]] == 3:
-                return 500
-            else:
-                return -1
-        else:
-            if observation[state[0], state[1]] == 4:
-                return 50
-            else:
-                return -1
 
     def get_new_state(self, observation, action, state):
         action_map = {0: [state[0], state[1] - 1, state[2]],  # down
@@ -137,6 +122,7 @@ class QLearnAgent(BaseAgent):
             return state
         else:
             return new_state
+
 
     # TODO: make flexible for different segmentations of the grid (give number of segmentations as input)
     def dirt_function(self, observation: np.ndarray, state):
