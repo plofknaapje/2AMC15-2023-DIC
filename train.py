@@ -113,7 +113,7 @@ def main(
         ]
 
         # Iterate through each agent for `iters` iterations
-        TOTAL_ITERATIONS = 1000
+        TOTAL_ITERATIONS = 10000
 
         for agent in agents:
             for i in range(TOTAL_ITERATIONS):
