@@ -96,6 +96,7 @@ def main(
             n_agents=1,
             agent_start_pos=None,
             sigma=sigma,
+            reward_fn='custom',
             target_fps=fps,
             random_seed=random_seed,
         )
@@ -112,7 +113,7 @@ def main(
         ]
 
         # Iterate through each agent for `iters` iterations
-        TOTAL_ITERATIONS = 100000
+        TOTAL_ITERATIONS = 100
 
         for agent in agents:
             for i in range(TOTAL_ITERATIONS):
@@ -127,7 +128,7 @@ def main(
                     # If the agent is terminated, we reset the env.
                     if terminated:
                         obs, info, world_stats = env.reset()
-                    agent.process_reward(obs, reward)
+                    agent.process_reward(action, reward)
                 obs, info, world_stats = env.reset()
                 print(world_stats)
 

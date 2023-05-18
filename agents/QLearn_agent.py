@@ -28,11 +28,19 @@ class QLearnAgent(BaseAgent):
         self.alpha = alpha
         self.Q = None
         self.dirtGrid = np.zeros(4)
+        self.epsilon_decay = epsilon
+        self.alpha_decay = alpha
+        self.state = [0, 0, 0]
+        self.new_state = [0, 0, 0]
 
-    def process_reward(self, observation: np.ndarray, reward: float):
-        pass
+    def process_reward(self, action: int, reward: float):
+        # update the Q function
+        self.Q[self.state[0], self.state[1], self.state[2], action] += \
+            self.alpha_decay * (reward + self.gamma * np.max(self.Q[self.new_state[0], self.new_state[1], self.new_state[2], :]) -
+                           self.Q[self.state[0], self.state[1], self.state[2], action])
+        return 0
 
-    def take_action(self, observation: np.ndarray, info: None | dict) -> int:
+    def take_action(self, observation: np.ndarray, info: None | dict):
 
         # TODO: How to initialize the Q table
         if self.Q is None:
@@ -54,38 +62,29 @@ class QLearnAgent(BaseAgent):
                 self.Q[idx[0], idx[1], :, :] = 5000
 
         # TODO: Store state somewhere, so don't need to recompute it
-        state = []
-        state.append(info['agent_pos'][0][0])
-        state.append(info['agent_pos'][0][1])
-        state.append(self.dirt_function(observation, state))
+        self.state[0] = info['agent_pos'][0][0]
+        self.state[1] = info['agent_pos'][0][1]
+        self.state[2] = self.dirt_function(observation, self.state)
 
         # Set alpha and epsilon according to iteration
         try:
             iteration = info['iteration']
-            epsilon_decay = self.epsilon * (1-iteration)
-            alpha_decay = self.alpha * (1-iteration)
+            self.epsilon_decay = self.epsilon * (1-iteration)
+            self.alpha_decay = self.alpha * (1-iteration)
         # If in evaluation no iteration can be found
         except:
-            epsilon_decay = 0
-            alpha_decay = 0.001
+            self.epsilon_decay = 0
+            self.alpha_decay = 0.001
 
         # TODO: During random moves: Should we train it with bumping into walls or should we avoid it?
         # take action according to epsilon greedy
-        if np.random.uniform(0, 1) < epsilon_decay:
-            action = self.get_action(state, observation)
+        if np.random.uniform(0, 1) < self.epsilon_decay:
+            action = self.get_action(self.state, observation)
         else:
-            action = np.argmax(self.Q[state[0], state[1], state[2], :])
+            action = np.argmax(self.Q[self.state[0], self.state[1], self.state[2], :])
 
         # new state
-        new_state = self.get_new_state(observation, action, state)
-
-        # compute reward
-        reward = self.reward_func(observation, new_state)
-
-        # update the Q function
-        self.Q[state[0], state[1], state[2], action] += \
-            alpha_decay * (reward + self.gamma * np.max(self.Q[new_state[0], new_state[1], new_state[2], :]) -
-                          self.Q[state[0], state[1], state[2], action])
+        self.new_state = self.get_new_state(observation, action, self.state)
 
         return action
 

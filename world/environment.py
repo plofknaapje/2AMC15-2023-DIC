@@ -109,7 +109,7 @@ class Environment:
             warn("No reward function provided. Using default reward.")
             self.reward_fn = self._default_reward_function
         else:
-            self.reward_fn = reward_fn
+            self.reward_fn = self._custom_reward_function
         self.info = self._reset_info()
         self.world_stats = self._reset_world_stats()
 
@@ -429,6 +429,48 @@ class Environment:
             action.
         """
         return float(sum(info["dirt_cleaned"]))
+
+    @staticmethod
+    def _custom_reward_function(grid: Grid, info: dict) -> float:
+        """This is the custom reward function.
+
+        Args:
+            grid: The grid the agent is moving on, in case that is needed by
+                the reward function.
+            info: The world info, in case that is needed by the reward function.
+
+        Returns:
+            A single floating point value representing the reward for a given
+            action.
+        """
+        dirt_reward = sum(info["dirt_cleaned"]) * 5
+
+        if info["agent_moved"] == [False] and info["agent_charging"][0] != True:
+            bumped_reward = -1
+        else:
+            bumped_reward = 0
+
+        if info["agent_moved"] == [True] and dirt_reward == 0:
+            moving_reward = -1
+        else:
+            moving_reward = 0
+
+        if grid.sum_dirt() == 0 and info["agent_charging"][0]:
+            charging_reward = 10
+        elif info["agent_charging"][0]:
+            charging_reward = -1
+        else:
+            charging_reward = 0
+
+        # print(grid.sum_dirt(), info["agent_charging"][0])
+        # print('DIRT REWARD:', dirt_reward)
+        # print('BUMPED REWARD:', bumped_reward)
+        # print('CHARGING REWARD:', charging_reward)
+        # print('MOVED REWARD: ', moving_reward)
+
+        total_reward = dirt_reward + bumped_reward + charging_reward + moving_reward
+
+        return total_reward
 
     @staticmethod
     def evaluate_agent(grid_fp: Path,
