@@ -64,7 +64,7 @@ def parse_args():
         help="Frames per second to render at. Only used if " "no_gui is not set.",
     )
     p.add_argument(
-        "--iter", type=int, default=1000, help="Number of iterations to go through."
+        "--iter", type=int, default=100, help="Number of iterations to go through."
     )
     p.add_argument(
         "--random_seed",

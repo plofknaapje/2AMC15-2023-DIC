@@ -50,20 +50,20 @@ class QLearnAgent(BaseAgent):
             self.Q = np.zeros([observation.shape[0], observation.shape[1], 2 ** 4, 4])
             self.epsilons = np.full((observation.shape[0], observation.shape[1]), self.epsilon)
             self.alphas = np.full((observation.shape[0], observation.shape[1]), self.alpha)
-            self.Q[:, 0, :, :] = -1000000  # first column we don't want to visit
-            self.Q[:, -1, :, :] = -1000000  # last column we don't want to visit
-            self.Q[0, :, :, :] = -1000000  # first row we don't want to visit
-            self.Q[-1, :, :, :] = -1000000  # last row we don't want to visit
+            #self.Q[:, 0, :, :] = -1000000  # first column we don't want to visit
+            #self.Q[:, -1, :, :] = -1000000  # last column we don't want to visit
+            #self.Q[0, :, :, :] = -1000000  # first row we don't want to visit
+            #self.Q[-1, :, :, :] = -1000000  # last row we don't want to visit
 
             # also set all values for inner walls to low values
-            indices_walls = np.argwhere(observation == 2)
-            for idx in indices_walls:
-                self.Q[idx[0], idx[1], :, :] = -1000000
+            #indices_walls = np.argwhere(observation == 2)
+            #for idx in indices_walls:
+            #    self.Q[idx[0], idx[1], :, :] = -1000000
 
             # also set values for dirt already high
-            indices_dirt = np.argwhere(observation == 3)
-            for idx in indices_dirt:
-                self.Q[idx[0], idx[1], :, :] = 5000
+            #indices_dirt = np.argwhere(observation == 3)
+            #for idx in indices_dirt:
+            #    self.Q[idx[0], idx[1], :, :] = 5000
 
         self.state[0] = info['agent_pos'][0][0]
         self.state[1] = info['agent_pos'][0][1]
@@ -71,10 +71,12 @@ class QLearnAgent(BaseAgent):
 
         # Set alpha and epsilon according to iteration
         try:
-            self.epsilon_decay = self.epsilons[self.state[0], self.state[1]] - 0.1
-            if self.epsilon_decay < 0.1:
-                self.epsilon_decay = 0.1
-            self.alpha_decay = self.alphas[self.state[0], self.state[1]] - 0.001
+            self.epsilons[self.state[0], self.state[1]] = self.epsilons[self.state[0], self.state[1]] - 0.1
+            self.epsilon_decay = self.epsilons[self.state[0], self.state[1]]
+            if self.epsilon_decay < 0.05:
+                self.epsilon_decay = 0.05
+            self.alphas[self.state[0], self.state[1]] = self.alphas[self.state[0], self.state[1]] - 0.001
+            self.alpha_decay = self.alphas[self.state[0], self.state[1]]
             if self.alpha_decay < 0.001:
                 self.alpha_decay = 0.001
         # If in evaluation no iteration can be found
