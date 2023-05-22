@@ -420,6 +420,7 @@ class Environment:
                     )
             self._move_agent(new_pos, i)
 
+
         # Update the grid with the new agent positions and calculate the reward
         reward = self.reward_fn(self.grid, self.info)
 
@@ -479,9 +480,9 @@ class Environment:
         dirt_reward = sum(info["dirt_cleaned"]) * 5
 
         if info["agent_moved"] == [False] and info["agent_charging"][0] != True:
-            bumped_reward = -1
+            bumped_reward = -2
         else:
-            bumped_reward = 0
+            bumped_reward = 1
 
         if info["agent_moved"] == [True] and dirt_reward == 0:
             moving_reward = -1

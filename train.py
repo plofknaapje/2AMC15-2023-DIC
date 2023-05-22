@@ -18,6 +18,7 @@ try:
     from agents.null_agent import NullAgent
     from agents.random_agent import RandomAgent
     from agents.value_agent import ValueAgent
+    from agents.monte_carlo_agent import MCAgent
     from world import Environment
 except ModuleNotFoundError:
     import sys
@@ -52,7 +53,7 @@ def parse_args():
     p.add_argument("--fps", type=int, default=30,
                    help="Frames per second to render at. Only used if "
                         "no_gui is not set.")
-    p.add_argument("--iter", type=int, default=1000,
+    p.add_argument("--iter", type=int, default=2000,
                    help="Number of iterations to go through.")
     p.add_argument("--random_seed", type=int, default=0,
                    help="Random seed value for the environment.")
@@ -79,10 +80,11 @@ def main(
             grid,
             no_gui,
             n_agents=1,
-            agent_start_pos=None,
+            agent_start_pos=[(1,1)],
             sigma=sigma,
             target_fps=fps,
             random_seed=random_seed,
+            reward_fn='custom'
         )
         obs, info = env.get_observation()
 
@@ -92,7 +94,8 @@ def main(
             # NullAgent(0),
             # GreedyAgent(0),
             # RandomAgent(0),
-            ValueAgent(0, gamma=0.9)
+            # ValueAgent(0, gamma=0.9)
+            MCAgent(0, obs)
         ]
 
         # Iterate through each agent for `iters` iterations
@@ -111,7 +114,7 @@ def main(
             obs, info, world_stats = env.reset()
             print(world_stats)
 
-            Environment.evaluate_agent(grid, [agent], 1000, out, 0.2)
+            Environment.evaluate_agent(grid, [agent], 2000, out, 0.2, agent_start_pos=[(1,1)])
 
 
 if __name__ == "__main__":
