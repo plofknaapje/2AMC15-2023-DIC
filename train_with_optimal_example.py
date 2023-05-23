@@ -37,6 +37,8 @@ except ModuleNotFoundError:
     from agents.greedy_agent import GreedyAgent
     from agents.random_agent import RandomAgent
 
+from optimal_path import optimal_path
+
 
 def parse_args():
     p = ArgumentParser(description="DIC Reinforcement Learning Trainer.")
@@ -50,7 +52,7 @@ def parse_args():
     p.add_argument("--fps", type=int, default=30,
                    help="Frames per second to render at. Only used if "
                         "no_gui is not set.")
-    p.add_argument("--iter", type=int, default=1000,
+    p.add_argument("--iter", type=int, default=100,
                    help="Number of iterations to go through.")
     p.add_argument("--random_seed", type=int, default=0,
                    help="Random seed value for the environment.")
@@ -65,17 +67,21 @@ def main(grid_paths: list[Path], no_gui: bool, iters: int, fps: int,
     """Main loop of the program."""
 
     for grid in grid_paths:
+        
+        # Print start position, optimal number of steps and optimal path
+        start_pos = (1,2)                               # Or: info['agent_pos'][0].
+        print('START POSITION:', start_pos)             # ^ In that case place this code block after environment intialization.
+        optimal = optimal_path(grid, start_pos)         
+        print('OPTIMAL NUMBER OF STEPS:', optimal[0])
+        print('OPTIMAL PATH:', optimal[1])
+        start_pos = (start_pos[1], start_pos[0])        # Invert the start position coordinates so that it matches what we see in the GUI.
+                                                        # This way it is consistent with the other functions below.
+
         # Set up the environment and reset it to its initial state
-        env = Environment(grid, no_gui, n_agents=1, agent_start_pos=None,
+        env = Environment(grid, no_gui, n_agents=1, agent_start_pos=[start_pos],
                           sigma=sigma, target_fps=fps, random_seed=random_seed,
                           reward_fn='custom')
         obs, info = env.get_observation()
-
-        # Set up the agents from scratch for every grid
-        # Add your agents here
-        # agents = [NullAgent(0),
-        #           GreedyAgent(0),
-        #           RandomAgent(0)]
 
         agents = [GreedyAgent(0)]
 
@@ -95,8 +101,7 @@ def main(grid_paths: list[Path], no_gui: bool, iters: int, fps: int,
             obs, info, world_stats = env.reset()
             print(world_stats)
 
-            Environment.evaluate_agent(grid, [agent], 1000, out, 0.2)
-
+            Environment.evaluate_agent(grid, [agent], 100, out, 0.2, agent_start_pos=[start_pos])
 
 
 if __name__ == '__main__':
