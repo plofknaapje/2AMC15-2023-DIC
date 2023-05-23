@@ -71,14 +71,16 @@ class QLearnAgent(BaseAgent):
 
         # Set alpha and epsilon according to iteration
         try:
-            self.epsilons[self.state[0], self.state[1]] = self.epsilons[self.state[0], self.state[1]] - 0.1
-            self.epsilon_decay = self.epsilons[self.state[0], self.state[1]]
-            if self.epsilon_decay < 0.05:
-                self.epsilon_decay = 0.05
-            self.alphas[self.state[0], self.state[1]] = self.alphas[self.state[0], self.state[1]] - 0.001
-            self.alpha_decay = self.alphas[self.state[0], self.state[1]]
-            if self.alpha_decay < 0.001:
-                self.alpha_decay = 0.001
+            self.epsilon_decay = self.epsilon * (1-info['iteration'])
+            self.alpha_decay = self.alpha * (1-info['iteration'])
+            # self.epsilons[self.state[0], self.state[1]] = self.epsilons[self.state[0], self.state[1]] - 0.1
+            # self.epsilon_decay = self.epsilons[self.state[0], self.state[1]]
+            # if self.epsilon_decay < 0.05:
+            #     self.epsilon_decay = 0.05
+            # self.alphas[self.state[0], self.state[1]] = self.alphas[self.state[0], self.state[1]] - 0.001
+            # self.alpha_decay = self.alphas[self.state[0], self.state[1]]
+            # if self.alpha_decay < 0.001:
+            #     self.alpha_decay = 0.001
         # If in evaluation no iteration can be found
         except:
             self.epsilon_decay = 0
@@ -118,8 +120,8 @@ class QLearnAgent(BaseAgent):
 
 
     def get_new_state(self, observation, action, state):
-        action_map = {0: [state[0], state[1] - 1, state[2]],  # down
-                      1: [state[0], state[1] + 1, state[2]],  # up
+        action_map = {0: [state[0], state[1] + 1, state[2]],  # down
+                      1: [state[0], state[1] - 1, state[2]],  # up
                       2: [state[0] - 1, state[1], state[2]],  # left
                       3: [state[0], state[1] + 1, state[2]],  # right
                       }

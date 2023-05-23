@@ -64,7 +64,7 @@ def parse_args():
         help="Frames per second to render at. Only used if " "no_gui is not set.",
     )
     p.add_argument(
-        "--iter", type=int, default=100, help="Number of iterations to go through."
+        "--iter", type=int, default=10000, help="Number of iterations to go through."
     )
     p.add_argument(
         "--random_seed",
@@ -87,14 +87,13 @@ def main(
     random_seed: int,
 ):
     """Main loop of the program."""
-
+    print(grid_paths)
     for grid in grid_paths:
         # Set up the environment and reset it to its initial state
         env = Environment(
             grid,
             no_gui=True,
             n_agents=1,
-            agent_start_pos=None,
             sigma=sigma,
             reward_fn='custom',
             target_fps=fps,
@@ -113,7 +112,7 @@ def main(
         ]
 
         # Iterate through each agent for `iters` iterations
-        TOTAL_ITERATIONS = 10000
+        TOTAL_ITERATIONS = 300
 
         for agent in agents:
             for i in range(TOTAL_ITERATIONS):
@@ -125,9 +124,10 @@ def main(
                     # The action is performed in the environment
                     obs, reward, terminated, info = env.step([action])
 
+                    agent.process_reward(action, reward)
                     # If the agent is terminated, we reset the env.
                     if terminated:
-                        obs, info, world_stats = env.reset()
+                        break
                     agent.process_reward(action, reward)
                 obs, info, world_stats = env.reset()
                 print(world_stats)
