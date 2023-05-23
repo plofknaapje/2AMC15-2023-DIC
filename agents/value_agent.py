@@ -18,7 +18,7 @@ def powerset(iterable):
             chain.from_iterable(combinations(s, r) for r in range(len(s)+1))]
 
 class ValueAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, theta=0.1):
+    def __init__(self, agent_number: int, gamma: float, verbose=False, theta=0.1):
         """
         Set agent parameters.
 
@@ -31,6 +31,7 @@ class ValueAgent(BaseAgent):
         self.gamma = gamma
         self.theta = theta
         self.values = None
+        self.verbose = verbose
 
     def process_reward(self, observation: np.ndarray, reward: float):
         pass
@@ -50,7 +51,8 @@ class ValueAgent(BaseAgent):
             start = time()
             self.generate_values(observation)
             runtime = time() - start
-            print(f"Value Iteration took {runtime:.1f} seconds.")
+            if self.verbose:
+                print(f"Value Iteration took {runtime:.1f} seconds.")
 
         agent_space = info["agent_pos"][self.agent_number]
 
@@ -81,7 +83,8 @@ class ValueAgent(BaseAgent):
         dirt_configs = powerset(self.dirt_spaces)
         complexity = 2**len(self.dirt_spaces)
         if complexity > 20000:
-            print(complexity)
+            if self.verbose:
+                print(complexity)
             raise ValueError("Too complicated for ValueIteration")
 
         self.states = [
@@ -110,9 +113,9 @@ class ValueAgent(BaseAgent):
                 old_value = self.values[state]
                 self.values[state] = self.max_action(state)[0]
                 delta = max(delta, abs(self.values[state] - old_value))
-
-            print(f"Iter {i} with delta {delta:.2f}")
-            i += 1
+            if self.verbose:
+                print(f"Iter {i} with delta {delta:.2f}")
+                i += 1
 
     def max_action(self, state) -> tuple[float, int]:
         """
@@ -189,3 +192,6 @@ class ValueAgent(BaseAgent):
 
     def generate_move(self, state):
         return self.max_action(state)[1]
+
+    def __str__(self):
+        return f"ValueAgent({self.agent_number}, {self.gamma})"
