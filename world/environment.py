@@ -49,7 +49,7 @@ class Environment:
         agent_start_pos: list[tuple[int, int]] = None,
         reward_fn: callable = None,
         target_fps: int = 30,
-        random_seed: int | float | str | bytes | bytearray | None = 0,
+        random_seed: int | float | str | bytes | bytearray | None = 0
     ):
         """Creates the grid environment for the robot vacuum.
 
@@ -110,12 +110,13 @@ class Environment:
             warn("No reward function provided. Using default reward.")
             self.reward_fn = self._default_reward_function
         else:
-            self.reward_fn = reward_fn
+            self.reward_fn = self._custom_reward_function
         self.info = self._reset_info()
         self.world_stats = self._reset_world_stats()
 
         self.environment_ready = False
         self.reset()
+
 
     def _reset_info(self) -> dict:
         """Resets the info dictionary.
@@ -151,6 +152,9 @@ class Environment:
             "total_agent_moves": 0,
             "total_agents_at_charger": 0,
             "total_failed_moves": 0,
+            "steps_per_dirt":0,
+            "failed_moves_fraction":0,
+            "total_reward":0
         }
 
     def _initialize_agent_pos(self):
@@ -418,6 +422,10 @@ class Environment:
 
         # Update the grid with the new agent positions and calculate the reward
         reward = self.reward_fn(self.grid, self.info)
+
+        # Get total reward
+        self.world_stats["total_reward"] += reward
+
         terminal_state = sum(self.agent_done) == self.n_agents
         if terminal_state:
             self.environment_ready = False
@@ -452,13 +460,61 @@ class Environment:
         """
         return float(sum(info["dirt_cleaned"]))
 
+
+
+
+    @staticmethod
+    def _custom_reward_function(grid: Grid, info: dict) -> float:
+        """This is the custom reward function.
+
+        Args:
+            grid: The grid the agent is moving on, in case that is needed by
+                the reward function.
+            info: The world info, in case that is needed by the reward function.
+
+        Returns:
+            A single floating point value representing the reward for a given
+            action.
+        """
+        dirt_reward = sum(info["dirt_cleaned"]) * 5
+
+        if info["agent_moved"] == [False] and info["agent_charging"][0] != True:
+            bumped_reward = -1
+        else:
+            bumped_reward = 0
+
+        if info["agent_moved"] == [True] and dirt_reward == 0:
+            moving_reward = -1
+        else:
+            moving_reward = 0
+
+        if grid.sum_dirt() == 0 and info["agent_charging"][0]:
+            charging_reward = 10
+        elif info["agent_charging"][0]:
+            charging_reward = -1
+        else:
+            charging_reward = 0
+
+        # print(grid.sum_dirt(), info["agent_charging"][0])
+        # print('DIRT REWARD:', dirt_reward)
+        # print('BUMPED REWARD:', bumped_reward)
+        # print('CHARGING REWARD:', charging_reward)
+        # print('MOVED REWARD: ', moving_reward)
+
+        total_reward = dirt_reward + bumped_reward + charging_reward + moving_reward
+
+        return total_reward
+
+
+
+
     @staticmethod
     def evaluate_agent(
         grid_fp: Path,
         agents: list[BaseAgent],
         max_steps: int,
         out_dir: Path,
-        sigma: float = 0.0,
+        sigma: float = 0.0,     #test with 2 values
         agent_start_pos: list[tuple[int, int]] = None,
         random_seed: int | float | str | bytes | bytearray = 0,
         show_images: bool = False,
@@ -507,6 +563,7 @@ class Environment:
             agent_start_pos=agent_start_pos,
             target_fps=-1,
             random_seed=random_seed,
+            reward_fn='custom'
         )
         obs, info = env.get_observation()
 
@@ -535,6 +592,13 @@ class Environment:
 
         world_stats["dirt_remaining"] = summed_dirt
 
+        # Get custom evaluation metrics
+        if world_stats["total_dirt_cleaned"]:
+            world_stats["steps_per_dirt"] = (world_stats["total_agent_moves"] + world_stats["total_failed_moves"]) / world_stats["total_dirt_cleaned"]
+        else:
+            world_stats["steps_per_dirt"] = -1
+        world_stats["failed_moves_fraction"] = world_stats["total_failed_moves"] / (world_stats["total_agent_moves"] + world_stats["total_failed_moves"])
+
         # Generate path images
         path_images = visualize_path(initial_grid, agent_paths)
 
@@ -555,10 +619,12 @@ class Environment:
             if show_images:
                 img.show(f"Agent {i} Path Frequency")
 
+        return world_stats
+
 
 if __name__ == "__main__":
     # This is sample code to test a single grid.
-    base_grid_fp = Path("../grid_configs/rooms-1.grd")
+    base_grid_fp = Path("grid_configs/rooms-1.grd")
     envi = Environment(base_grid_fp, False, 1, target_fps=5)
     observe, inf = envi.get_observation()
 

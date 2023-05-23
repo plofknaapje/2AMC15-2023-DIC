@@ -2,15 +2,23 @@
 
 Chooses the best scoring value with no thought about the future.
 """
-from random import randint
 
 import numpy as np
 
 from agents import BaseAgent
 
+from itertools import chain, combinations
+from time import time
+
+
+def powerset(iterable):
+    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    s = list(iterable)  # allows duplicate elements
+    return [set for set in
+            chain.from_iterable(combinations(s, r) for r in range(len(s)+1))]
 
 class ValueAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, theta=0.001):
+    def __init__(self, agent_number: int, gamma: float, verbose=False, theta=0.1):
         """
         Set agent parameters.
 
@@ -22,6 +30,8 @@ class ValueAgent(BaseAgent):
         super().__init__(agent_number)
         self.gamma = gamma
         self.theta = theta
+        self.values = None
+        self.verbose = verbose
 
     def process_reward(self, observation: np.ndarray, reward: float):
         pass
@@ -37,55 +47,77 @@ class ValueAgent(BaseAgent):
         Returns:
             int: action to be taken.
         """
+        if self.values is None:
+            start = time()
+            self.generate_values(observation)
+            runtime = time() - start
+            if self.verbose:
+                print(f"Value Iteration took {runtime:.1f} seconds.")
 
-        # Setup for VI
-        self.obs = observation
+        agent_space = info["agent_pos"][self.agent_number]
+
+        dirt_left = tuple(space for space in self.spaces
+                          if observation[space] == 3 and space != agent_space)
+
+        state = (agent_space, dirt_left)
+        # print(state)
+        # print(self.max_action(state))
+        return self.generate_move(state)
+
+    def generate_values(self, observation):
         cols, rows = observation.shape
-        # Col - row
+
+        self.spaces = [
+            (i, j) for i in range(cols) for j in range(rows)
+            if observation[i, j] in (0, 3, 4)]
+
+        self.charge_spaces = [
+            space for space in self.spaces
+            if observation[space] == 4
+        ]
+
+        self.dirt_spaces = [
+            space for space in self.spaces
+            if observation[space] == 3]
+
+        dirt_configs = powerset(self.dirt_spaces)
+        complexity = 2**len(self.dirt_spaces)
+        if complexity > 20000:
+            if self.verbose:
+                print(complexity)
+            raise ValueError("Too complicated for ValueIteration")
+
         self.states = [
-            (i, j)
-            for i in range(cols)
-            for j in range(rows)
-            if observation[i, j] in (0, 3, 4)
-        ]
-        self.chargers = [
-            (i, j) for i in range(cols) for j in range(rows) if observation[i, j] == 4
-        ]
+            (space, dirt_left)
+            for space in self.spaces
+            for dirt_left in dirt_configs
+            if observation[space] in (0, 3, 4)]
 
-        # Initialize self.values based on situation in the room
-        if 3 in self.obs:  # Still dirt to be cleaned
-            self.values = {
-                state: (1 if self.obs[state] == 3 else 0) for state in self.states
-            }
-            for charger in self.chargers:
-                self.values[charger] = -1
-            self.cleaning = True
-        else:  # Go to charging station
-            self.values = {
-                state: (1 if state in self.chargers else 0) for state in self.states
-            }
-            self.cleaning = False
+        self.values = {
+            state: 0
+            for state in self.states
+        }
 
-        self.value_iteration()
+        self.value_iteration(observation)
 
-        # Use self.values to pick best action
-        state = info["agent_pos"][self.agent_number]
-        return self.generate_policy(state)
-
-    def value_iteration(self):
+    def value_iteration(self, observation):
         """
         Value iteration implementation. Keep optimizing V until change is
         smaller than theta. self.values is updated in place.
         """
         delta = 2 * self.theta  # Initial delta to ensure loop starts
+        i = 0
         while delta > self.theta:
             delta = 0
             for state in self.states:
                 old_value = self.values[state]
-                self.values[state] = self.max_action(state, True)[0]
+                self.values[state] = self.max_action(state)[0]
                 delta = max(delta, abs(self.values[state] - old_value))
+            if self.verbose:
+                print(f"Iter {i} with delta {delta:.2f}")
+                i += 1
 
-    def max_action(self, state: tuple[int, int]) -> tuple[float, int]:
+    def max_action(self, state) -> tuple[float, int]:
         """
         Try all actions from the current state and determine the action with
         the highest expected value.
@@ -97,19 +129,27 @@ class ValueAgent(BaseAgent):
             tuple: value, action pair with the highest value.
         """
         value_action = []
+
+        if state[0] in self.charge_spaces and len(state[1]) == 0:
+            value_action.append((100.0, 4))
+
         for action in (0, 1, 2, 3, 4):
             new_state = self.action_outcome(state, action)
-            if new_state == (-1, -1):
+            new_space, dirt_left = new_state
+
+            if new_space == (-1, -1):
                 continue
-            elif self.obs[new_state] == 3 and self.cleaning:
-                value = 1
-            elif self.obs[new_state] == 4 and not self.cleaning:
-                value = 1
-            elif self.obs[new_state] == 4 and self.cleaning:
-                value = 0
+            elif new_space in dirt_left:
+                value = 10
+            elif new_space in self.charge_spaces and len(dirt_left) == 0:
+                value = 100
+            elif new_space in self.charge_spaces:
+                value = -1
             else:
-                value = self.values[new_state] * self.gamma
-            value_action.append((value, action))
+                value = 0
+            new_value = value + self.values[new_state] * self.gamma
+
+            value_action.append((new_value, action))
 
         return max(value_action)
 
@@ -125,22 +165,33 @@ class ValueAgent(BaseAgent):
             tuple: resulting state. (-1, -1) if the action is illegal.
         """
         # Col - row
-        x, y = state
+        space, dirt_left = state
+        x, y = space
+
+        if space in dirt_left:
+            temp = list(dirt_left)
+            temp.remove(space)
+            dirt_left = tuple(temp)
+
         match action:
             case 0:  # Down
-                new_state = (x, y + 1)
+                new_space = (x, y + 1)
             case 1:  # Up
-                new_state = (x, y - 1)
+                new_space = (x, y - 1)
             case 2:  # Left
-                new_state = (x - 1, y)
+                new_space = (x - 1, y)
             case 3:  # Right
-                new_state = (x + 1, y)
+                new_space = (x + 1, y)
             case 4:  # Stand still
-                new_state = state
-        if new_state in self.states:
-            return new_state
-        else:
-            return (-1, -1)
+                new_space = space
 
-    def generate_policy(self, state):
+        if new_space in self.spaces:
+            return (new_space, dirt_left)
+        else:
+            return ((-1, -1), ())
+
+    def generate_move(self, state):
         return self.max_action(state)[1]
+
+    def __str__(self):
+        return f"ValueAgent({self.agent_number}, {self.gamma})"
