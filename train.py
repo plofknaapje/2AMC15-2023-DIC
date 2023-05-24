@@ -53,7 +53,7 @@ def parse_args():
     p.add_argument("--fps", type=int, default=30,
                    help="Frames per second to render at. Only used if "
                         "no_gui is not set.")
-    p.add_argument("--iter", type=int, default=2000,
+    p.add_argument("--iter", type=int, default=1000,
                    help="Number of iterations to go through.")
     p.add_argument("--random_seed", type=int, default=0,
                    help="Random seed value for the environment.")
@@ -80,7 +80,7 @@ def main(
             grid,
             no_gui,
             n_agents=1,
-            agent_start_pos=[(1,1)],
+            # agent_start_pos=[(1,1)],
             sigma=sigma,
             target_fps=fps,
             random_seed=random_seed,
@@ -95,26 +95,32 @@ def main(
             # GreedyAgent(0),
             # RandomAgent(0),
             # ValueAgent(0, gamma=0.9)
-            MCAgent(0, obs)
+            MCAgent(0, obs),
+            # MCAgent(0.25, obs)
         ]
 
         # Iterate through each agent for `iters` iterations
+        total_iterations=750
+
         for agent in agents:
-            for _ in trange(iters):
-                # Agent takes an action based on the latest observation and info
-                action = agent.take_action(obs, info)
+            for i in range(total_iterations):
+                for _ in trange(iters):
+                    # Agent takes an action based on the latest observation and info
+                    action = agent.take_action(obs, info)
 
-                # The action is performed in the environment
-                obs, reward, terminated, info = env.step([action])
+                    # The action is performed in the environment
+                    obs, reward, terminated, info = env.step([action])
 
-                # If the agent is terminated, we reset the env.
-                if terminated:
-                    obs, info, world_stats = env.reset()
-                agent.process_reward(obs, reward)
-            obs, info, world_stats = env.reset()
-            print(world_stats)
-
-            Environment.evaluate_agent(grid, [agent], 2000, out, 0.2, agent_start_pos=[(1,1)])
+                    agent.process_reward(action,reward)
+                    # If the agent is terminated, we reset the env.
+                    if terminated:
+                        break
+                    agent.process_reward(action, reward)
+                obs, info, world_stats = env.reset()
+                print(world_stats)
+            
+            info['iteration'] = 0
+            Environment.evaluate_agent(grid, [agent], 1000, out, 0.2)
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ class MCAgent(BaseAgent):
         self.gamma = 0.5
         self.epsilon = 0.4
         self.max_steps_without_cleaning = 20
-
+        self.agent_start_pos=None
         # Keeps track of the starting position, and last found dirt's location.
         # If we have moved too much without finding any more, we'll reset to
         # that location. 
