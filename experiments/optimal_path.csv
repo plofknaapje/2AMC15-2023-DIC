@@ -1,0 +1,9 @@
+room,start_position,path_length
+simple_grid.grd,"(1, 1)",25
+simple_grid.grd,"(1, 8)",24
+simple_grid.grd,"(8, 1)",24
+simple_grid.grd,"(8, 8)",27
+multi_room.grd,"(1, 1)",42
+multi_room.grd,"(1, 8)",59
+multi_room.grd,"(8, 1)",43
+multi_room.grd,"(8, 8)",54
