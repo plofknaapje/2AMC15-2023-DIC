@@ -113,28 +113,16 @@ def train(
                 raise ValueError("No valid room name!")
 
             for start in starts:
-                if isinstance(agent, GreedyAgent):
+                for sigma in [0.0, 0.25]:
+                    print(f"{agent}, start={start}, sigma={sigma}")
                     world_stats = Environment.evaluate_agent(
                         grid, [agent], 1000, out_runs, sigma,
-                        agent_start_pos=[start])
+                        agent_start_pos=[start], random_seed=0)
                     world_stats["start"] = start
-                    world_stats["agent"] = "GreedyAgent"
+                    world_stats["agent"] = str(agent)
                     world_stats["room"] = room_name
                     world_stats["sigma"] = sigma
                     results.append(world_stats)
-
-                elif isinstance(agent, ValueAgent):
-                    # Add evaluation sigmas here
-                    for sigma in [0.0, 0.25]:
-                        print(f"{agent}, start={start}, sigma={sigma}")
-                        world_stats = Environment.evaluate_agent(
-                            grid, [agent], 1000, out_runs, sigma,
-                            agent_start_pos=[start])
-                        world_stats["start"] = start
-                        world_stats["agent"] = str(agent)
-                        world_stats["room"] = room_name
-                        world_stats["sigma"] = sigma
-                        results.append(world_stats)
 
     results = pd.DataFrame.from_records(results)
     results.to_csv(out_experiments / "value_iteration_results.csv", index=False)
