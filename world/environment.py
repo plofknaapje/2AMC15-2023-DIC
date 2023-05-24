@@ -594,7 +594,10 @@ class Environment:
         world_stats["dirt_remaining"] = summed_dirt
 
         # Get custom evaluation metrics
-        world_stats["steps_per_dirt"] = (world_stats["total_agent_moves"] + world_stats["total_failed_moves"]) / world_stats["total_dirt_cleaned"]
+        if world_stats["total_dirt_cleaned"] == 0:
+            world_stats["steps_per_dirt"] = 0
+        else:    
+            world_stats["steps_per_dirt"] = (world_stats["total_agent_moves"] + world_stats["total_failed_moves"]) / world_stats["total_dirt_cleaned"]
         world_stats["failed_moves_fraction"] = world_stats["total_failed_moves"] / (world_stats["total_agent_moves"] + world_stats["total_failed_moves"])
 
         # Generate path images
@@ -616,7 +619,7 @@ class Environment:
             img.save(out_fp)
             if show_images:
                 img.show(f"Agent {i} Path Frequency")
-
+        return world_stats
 
 if __name__ == "__main__":
     # This is sample code to test a single grid.

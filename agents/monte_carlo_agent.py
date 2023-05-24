@@ -4,14 +4,14 @@ from agents import BaseAgent
 
 
 class MCAgent(BaseAgent):
-    def __init__(self, agent_number, obs: np.ndarray):
+    def __init__(self, agent_number, obs: np.ndarray, gamma=0.5, epsilon=0.4):
         
         super().__init__(agent_number)
 
         # parameters
         self.max_len_episode = 30
-        self.gamma = 0.5
-        self.epsilon = 0.4
+        self.gamma = gamma
+        self.epsilon = epsilon
         self.max_steps_without_cleaning = 20
         self.agent_start_pos=None
         # Keeps track of the starting position, and last found dirt's location.

@@ -8,16 +8,10 @@ change this to however you want it to work.
 """
 from argparse import ArgumentParser
 from pathlib import Path
-
+import pandas as pd
 from tqdm import trange
 
 try:
-    from agents.greedy_agent import GreedyAgent
-
-    # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.random_agent import RandomAgent
-    from agents.value_agent import ValueAgent
     from agents.monte_carlo_agent import MCAgent
     from world import Environment
 except ModuleNotFoundError:
@@ -31,12 +25,7 @@ except ModuleNotFoundError:
     if root_path not in sys.path:
         sys.path.extend(root_path)
 
-    from agents.greedy_agent import GreedyAgent
-
-    # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.random_agent import RandomAgent
-    from agents.value_agent import ValueAgent
+    from agents.monte_carlo_agent import MCAgent
     from world import Environment
 
 
@@ -53,7 +42,7 @@ def parse_args():
     p.add_argument("--fps", type=int, default=30,
                    help="Frames per second to render at. Only used if "
                         "no_gui is not set.")
-    p.add_argument("--iter", type=int, default=1000,
+    p.add_argument("--iter", type=int, default=2000,
                    help="Number of iterations to go through.")
     p.add_argument("--random_seed", type=int, default=0,
                    help="Random seed value for the environment.")
@@ -73,14 +62,15 @@ def main(
     random_seed: int,
 ):
     """Main loop of the program."""
-
+    results=[]
     for grid in grid_paths:
+        
+        
         # Set up the environment and reset it to its initial state
         env = Environment(
             grid,
             no_gui,
             n_agents=1,
-            # agent_start_pos=[(1,1)],
             sigma=sigma,
             target_fps=fps,
             random_seed=random_seed,
@@ -91,18 +81,16 @@ def main(
         # Set up the agents from scratch for every grid
         # Add your agents here
         agents = [
-            # NullAgent(0),
-            # GreedyAgent(0),
-            # RandomAgent(0),
-            # ValueAgent(0, gamma=0.9)
-            MCAgent(0, obs),
-            # MCAgent(0.25, obs)
+            MCAgent(0, obs, gamma=0.75, epsilon = 0.4),
+            MCAgent(0, obs, gamma=0.75, epsilon = 0.6),
+            MCAgent(0, obs, gamma=0.75, epsilon = 0.5)
         ]
 
         # Iterate through each agent for `iters` iterations
-        total_iterations=750
+        total_iterations=100
 
         for agent in agents:
+            #training loops
             for i in range(total_iterations):
                 for _ in trange(iters):
                     # Agent takes an action based on the latest observation and info
@@ -116,12 +104,36 @@ def main(
                     if terminated:
                         break
                     agent.process_reward(action, reward)
-                obs, info, world_stats = env.reset()
+                try:
+                    obs, info, world_stats = env.reset(agent_start_pos=[(i%env.grid.n_cols,_%env.grid.n_rows)])
+                except ValueError:
+                    continue #this can be made more elegant for the second assignment
                 print(world_stats)
             
             info['iteration'] = 0
-            Environment.evaluate_agent(grid, [agent], 1000, out, 0.2)
+            Environment.evaluate_agent(grid, [agent], 500, out, 0.2)
 
+            print("")
+            print(str(agent))
+            stats={}
+            startpoints=[(1, 1), (8, 1), (1, 8), (8, 8)]
+            for start in startpoints:
+                for sigma in [0.0, 0.25]:
+                    print(f"{agent}, start={start}, sigma={sigma}")
+                    world_stats = Environment.evaluate_agent(
+                        grid_fp=grid, agents=[agent], max_steps=1000,  sigma=sigma, out_dir=out,
+                        agent_start_pos=[start], random_seed=0)
+                    stats["start"] = start
+                    stats["agent"] = str(agent)
+                    stats["room_name"]=str(grid)
+                    stats["sigma"] = sigma
+                    stats["gamma"] = agent.gamma
+                    stats["epsilon"] = agent.epsilon
+                    stats["dirt_cleaned"] = world_stats["total_dirt_cleaned"]
+                    results.append(stats)
+
+    results = pd.DataFrame.from_records(results)
+    results.to_csv("MC_results.csv", index=False)       
 
 if __name__ == "__main__":
     args = parse_args()
