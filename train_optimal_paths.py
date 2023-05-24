@@ -10,6 +10,7 @@ from pathlib import Path
 from optimal_path import optimal_path
 import pandas as pd
 
+
 def train(grid_paths: list[Path], out_experiments: Path):
     """Main loop of the program."""
     results = {"room": [], "start_position": [], "path_length": []}
@@ -25,8 +26,6 @@ def train(grid_paths: list[Path], out_experiments: Path):
             raise ValueError("No valid room name!")
 
         for start_pos in starts:
-            # Print start position, optimal number of steps and optimal path
-            print('START POSITION:', start_pos)             # ^ In that case place this code block after environment intialization.
             optimal = optimal_path(grid, start_pos)
             path_len = optimal[0]
             start_pos = (start_pos[1], start_pos[0])

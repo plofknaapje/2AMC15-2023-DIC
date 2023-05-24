@@ -15,8 +15,6 @@ try:
     from agents.greedy_agent import GreedyAgent
 
     # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.random_agent import RandomAgent
     from agents.value_agent import ValueAgent
     from world import Environment
 except ModuleNotFoundError:
@@ -32,13 +30,11 @@ except ModuleNotFoundError:
 
     from agents.greedy_agent import GreedyAgent
 
-    # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.random_agent import RandomAgent
     from agents.value_agent import ValueAgent
     from world import Environment
 
 import pandas as pd
+
 
 def train(
     grid_paths: list[Path],
@@ -82,6 +78,7 @@ def train(
         obs, info = env.get_observation()
         # Add agents with different configurations here
         agents = [
+            GreedyAgent(0),
             ValueAgent(0, gamma=0.9),
             ValueAgent(0, gamma=0.6)
         ]
@@ -116,15 +113,28 @@ def train(
                 raise ValueError("No valid room name!")
 
             for start in starts:
-                # Add evaluation sigmas here
-                for sigma in [0.0, 0.2]:
-                    print(f"{agent}, start={start}, sigma={sigma}")
-                    world_stats = Environment.evaluate_agent(grid, [agent], 1000, out_runs, sigma, agent_start_pos=[start])
+                if isinstance(agent, GreedyAgent):
+                    world_stats = Environment.evaluate_agent(
+                        grid, [agent], 1000, out_runs, sigma,
+                        agent_start_pos=[start])
                     world_stats["start"] = start
-                    world_stats["agent"] = str(agent)
+                    world_stats["agent"] = "GreedyAgent"
                     world_stats["room"] = room_name
                     world_stats["sigma"] = sigma
                     results.append(world_stats)
+
+                elif isinstance(agent, ValueAgent):
+                    # Add evaluation sigmas here
+                    for sigma in [0.0, 0.25]:
+                        print(f"{agent}, start={start}, sigma={sigma}")
+                        world_stats = Environment.evaluate_agent(
+                            grid, [agent], 1000, out_runs, sigma,
+                            agent_start_pos=[start])
+                        world_stats["start"] = start
+                        world_stats["agent"] = str(agent)
+                        world_stats["room"] = room_name
+                        world_stats["sigma"] = sigma
+                        results.append(world_stats)
 
     results = pd.DataFrame.from_records(results)
     results.to_csv(out_experiments / "value_iteration_results.csv", index=False)
