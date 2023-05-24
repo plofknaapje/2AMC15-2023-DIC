@@ -108,11 +108,12 @@ def train(
             print("")
             print(str(agent))
             # Add starting spaces here
-            if room_name == "test_1.grd":
-                starts = [(8, 8), (1, 8), (8, 1), (4, 4)]
-
-            if room_name == "test_2.grd":
-                starts = [(1, 1), (1, 9), (10, 1), (7, 7)]
+            if room_name == "simple_grid.grd":
+                starts = [(1, 1), (8, 1), (1, 8), (8, 8)]
+            elif room_name == "multi_room.grd":
+                starts = [(1, 1), (8, 1), (1, 8), (8, 8)]
+            else:
+                raise ValueError("No valid room name!")
 
             for start in starts:
                 # Add evaluation sigmas here
@@ -131,7 +132,7 @@ def train(
 
 if __name__ == "__main__":
     train(
-        grid_paths=["grid_configs/test_1.grd", "grid_configs/test_2.grd"],
+        grid_paths=["grid_configs/simple_grid.grd", "grid_configs/multi_room.grd"],
         no_gui=True,
         iters=100,
         fps=10,
