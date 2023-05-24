@@ -22,7 +22,7 @@ class MCAgent(BaseAgent):
         # self.reset_location = None
 
         self.x_size, self.y_size = obs.shape
-        self.A = [0, 1, 2, 3, 4]
+        self.A = [0, 1, 2, 3]
 
         # Create a 3D array named Returns, where each entry is a dictionary
         # the dictionary contains the following keys:
@@ -45,7 +45,7 @@ class MCAgent(BaseAgent):
                     1: np.random.rand(),
                     2: np.random.rand(),
                     3: np.random.rand(),
-                    4: np.random.rand(),
+                    # 4: np.random.rand(),
                 }
                 for i in range(self.y_size)
             ]
@@ -194,7 +194,7 @@ class MCAgent(BaseAgent):
                         1 - self.epsilon + self.epsilon / len(self.A)
                     )
 
-                    action = np.random.choice(a=5, p=action_probs)
+                    action = np.random.choice(a=4, p=action_probs)
 
                 # set the policy at x,y,d to the chosen action
                 self.policy[x, y] = action

@@ -561,7 +561,7 @@ class Environment:
             no_gui=True,
             n_agents=len(agents),
             sigma=sigma,
-            agent_start_pos=agent_start_pos,
+            agent_start_pos=None,
             target_fps=-1,
             random_seed=random_seed,
             reward_fn='custom'
