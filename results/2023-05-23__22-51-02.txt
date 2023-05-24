@@ -1,0 +1,9 @@
+total_dirt_cleaned: 1
+total_steps: 100
+total_agent_moves: 61
+total_agents_at_charger: 0
+total_failed_moves: 39
+steps_per_dirt: 100.0
+failed_moves_fraction: 0.39
+total_reward: -94
+dirt_remaining: 6
