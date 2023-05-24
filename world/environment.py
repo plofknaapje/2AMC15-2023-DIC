@@ -443,10 +443,10 @@ class Environment:
             A single floating point value representing the reward for a given
             action.
         """
-        dirt_reward = sum(info["dirt_cleaned"]) * 5000
+        dirt_reward = sum(info["dirt_cleaned"]) * 5
 
         if info["agent_moved"] == [False] and info["agent_charging"][0] != True:
-            bumped_reward = -200
+            bumped_reward = -2
         else:
             bumped_reward = 0
 
@@ -456,7 +456,7 @@ class Environment:
             moving_reward = 0
 
         if grid.sum_dirt() == 0 and info["agent_charging"][0]:
-            charging_reward = 100000
+            charging_reward = 1000
         elif info["agent_charging"][0]:
             charging_reward = -1
         else:

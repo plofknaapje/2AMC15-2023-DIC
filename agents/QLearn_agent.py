@@ -10,7 +10,7 @@ from agents import BaseAgent
 
 
 class QLearnAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, theta=0.001, epsilon=0.5, alpha=0.4):
+    def __init__(self, agent_number: int, gamma: float, theta=0.001, epsilon=0.5, alpha=0.04):
         """
         Set agent parameters.
 
@@ -50,10 +50,10 @@ class QLearnAgent(BaseAgent):
             self.Q = np.zeros([observation.shape[0], observation.shape[1], 2 ** 4, 4])
             self.epsilons = np.full((observation.shape[0], observation.shape[1]), self.epsilon)
             self.alphas = np.full((observation.shape[0], observation.shape[1]), self.alpha)
-            #self.Q[:, 0, :, :] = -1000000  # first column we don't want to visit
-            #self.Q[:, -1, :, :] = -1000000  # last column we don't want to visit
-            #self.Q[0, :, :, :] = -1000000  # first row we don't want to visit
-            #self.Q[-1, :, :, :] = -1000000  # last row we don't want to visit
+            self.Q[:, 0, :, :] = -1000  # first column we don't want to visit
+            self.Q[:, -1, :, :] = -1000  # last column we don't want to visit
+            self.Q[0, :, :, :] = -1000  # first row we don't want to visit
+            self.Q[-1, :, :, :] = -1000  # last row we don't want to visit
 
             # also set all values for inner walls to low values
             #indices_walls = np.argwhere(observation == 2)

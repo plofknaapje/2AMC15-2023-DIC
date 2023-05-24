@@ -112,10 +112,11 @@ def main(
         ]
 
         # Iterate through each agent for `iters` iterations
-        TOTAL_ITERATIONS = 300
+        TOTAL_ITERATIONS = 100
 
         for agent in agents:
             for i in range(TOTAL_ITERATIONS):
+                print(i)
                 for _ in trange(iters):
                     # Agent takes an action based on the latest observation and info
                     info['iteration'] = i/TOTAL_ITERATIONS
@@ -133,6 +134,7 @@ def main(
                 print(world_stats)
 
             info['iteration'] = 0
+            print(agent.Q[:, :, 1, 1])
             Environment.evaluate_agent(grid, [agent], 1000, out, 0.2)
 
 
