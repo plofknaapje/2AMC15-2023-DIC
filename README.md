@@ -1,7 +1,7 @@
 # 2AMC15-2023-DIC
 
 Welcome to 2AMC15 Data Intelligence Challenge!.
-This is the repository containing the challenge environment code of group 10.
+This is the repository containing the challenge environment code.
 
 ## Quickstart
 
