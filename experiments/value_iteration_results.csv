@@ -1,8 +1,12 @@
 total_dirt_cleaned,total_steps,total_agent_moves,total_agents_at_charger,total_failed_moves,steps_per_dirt,failed_moves_fraction,total_reward,dirt_remaining,start,agent,room,sigma
-3,387,328,1,58,128.66666666666666,0.15025906735751296,-358,0,"(1, 1)",GreedyAgent,simple_grid.grd,0.0
-3,386,334,1,51,128.33333333333334,0.13246753246753246,-357,0,"(8, 1)",GreedyAgent,simple_grid.grd,0.0
-3,433,360,1,72,144.0,0.16666666666666666,-404,0,"(1, 8)",GreedyAgent,simple_grid.grd,0.0
-3,432,361,1,70,143.66666666666666,0.16241299303944315,-403,0,"(8, 8)",GreedyAgent,simple_grid.grd,0.0
+3,387,328,1,58,128.66666666666666,0.15025906735751296,-358,0,"(1, 1)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC548F730>,simple_grid.grd,0.0
+3,1000,855,0,145,333.3333333333333,0.145,-982,0,"(1, 1)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC548F730>,simple_grid.grd,0.25
+3,386,334,1,51,128.33333333333334,0.13246753246753246,-357,0,"(8, 1)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC548F730>,simple_grid.grd,0.0
+3,342,293,1,48,113.66666666666667,0.14076246334310852,-313,0,"(8, 1)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC548F730>,simple_grid.grd,0.25
+3,433,360,1,72,144.0,0.16666666666666666,-404,0,"(1, 8)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC548F730>,simple_grid.grd,0.0
+3,1000,839,0,161,333.3333333333333,0.161,-982,0,"(1, 8)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC548F730>,simple_grid.grd,0.25
+3,432,361,1,70,143.66666666666666,0.16241299303944315,-403,0,"(8, 8)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC548F730>,simple_grid.grd,0.0
+3,1000,839,0,161,333.3333333333333,0.161,-982,0,"(8, 8)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC548F730>,simple_grid.grd,0.25
 3,25,24,1,0,8.0,0.0,4,0,"(1, 1)","ValueAgent(0, 0.9)",simple_grid.grd,0.0
 3,25,24,1,0,8.0,0.0,4,0,"(1, 1)","ValueAgent(0, 0.9)",simple_grid.grd,0.25
 3,24,23,1,0,7.666666666666667,0.0,5,0,"(8, 1)","ValueAgent(0, 0.9)",simple_grid.grd,0.0
@@ -19,10 +23,14 @@ total_dirt_cleaned,total_steps,total_agent_moves,total_agents_at_charger,total_f
 3,24,23,1,0,7.666666666666667,0.0,5,0,"(1, 8)","ValueAgent(0, 0.6)",simple_grid.grd,0.25
 3,27,26,1,0,8.666666666666666,0.0,2,0,"(8, 8)","ValueAgent(0, 0.6)",simple_grid.grd,0.0
 3,27,26,1,0,8.666666666666666,0.0,2,0,"(8, 8)","ValueAgent(0, 0.6)",simple_grid.grd,0.25
-2,1000,695,0,305,500.0,0.305,-988,2,"(1, 1)",GreedyAgent,multi_room.grd,0.25
-2,1000,711,0,289,500.0,0.289,-988,2,"(8, 1)",GreedyAgent,multi_room.grd,0.25
-3,1000,736,0,264,333.3333333333333,0.264,-982,1,"(1, 8)",GreedyAgent,multi_room.grd,0.25
-3,1000,749,0,251,333.3333333333333,0.251,-982,1,"(8, 8)",GreedyAgent,multi_room.grd,0.25
+4,841,584,1,256,210.0,0.3047619047619048,-806,0,"(1, 1)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC7BCB040>,multi_room.grd,0.0
+2,1000,695,0,305,500.0,0.305,-988,2,"(1, 1)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC7BCB040>,multi_room.grd,0.25
+4,841,587,1,253,210.0,0.3011904761904762,-806,0,"(8, 1)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC7BCB040>,multi_room.grd,0.0
+2,1000,711,0,289,500.0,0.289,-988,2,"(8, 1)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC7BCB040>,multi_room.grd,0.25
+3,1000,713,0,287,333.3333333333333,0.287,-982,1,"(1, 8)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC7BCB040>,multi_room.grd,0.0
+3,1000,736,0,264,333.3333333333333,0.264,-982,1,"(1, 8)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC7BCB040>,multi_room.grd,0.25
+3,1000,719,0,281,333.3333333333333,0.281,-982,1,"(8, 8)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC7BCB040>,multi_room.grd,0.0
+3,1000,749,0,251,333.3333333333333,0.251,-982,1,"(8, 8)",<agents.greedy_agent.GreedyAgent object at 0x000001FEC7BCB040>,multi_room.grd,0.25
 4,42,41,1,0,10.25,0.0,-7,0,"(1, 1)","ValueAgent(0, 0.9)",multi_room.grd,0.0
 4,47,45,1,1,11.5,0.021739130434782608,-12,0,"(1, 1)","ValueAgent(0, 0.9)",multi_room.grd,0.25
 4,43,42,1,0,10.5,0.0,-8,0,"(8, 1)","ValueAgent(0, 0.9)",multi_room.grd,0.0
