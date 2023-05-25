@@ -118,7 +118,7 @@ class ValueAgent(BaseAgent):
             for state in self.states
         }
 
-        self.value_iteration(observation)
+        self.value_iteration()
 
     def value_iteration(self):
         """
