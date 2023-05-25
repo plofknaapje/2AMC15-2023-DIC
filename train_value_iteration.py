@@ -1,10 +1,5 @@
-"""Train.
-
-Train your RL Agent in this file.
-Feel free to modify this file as you need.
-
-In this example training script, we use command line arguments. Feel free to
-change this to however you want it to work.
+"""
+Trains the Value Iteration Agent and reports the result.
 """
 from pathlib import Path
 from tqdm import trange
