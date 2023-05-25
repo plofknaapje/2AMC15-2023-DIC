@@ -6,8 +6,6 @@ Feel free to modify this file as you need.
 In this example training script, we use command line arguments. Feel free to
 change this to however you want it to work.
 """
-import os
-from argparse import ArgumentParser
 from pathlib import Path
 from tqdm import trange
 
