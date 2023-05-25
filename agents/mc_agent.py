@@ -87,8 +87,8 @@ class MCAgent(BaseAgent):
 
             for state in episode_states:
                 self.pi[state] = self.best_action(state)
-        else:
-            print("0 reward :-(")
+        # else:
+        #     print("0 reward :-(")
 
         self.reset_agent_state()
 
