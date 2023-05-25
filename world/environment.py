@@ -269,6 +269,7 @@ class Environment:
                 self.gui.close()
 
         self.environment_ready = True
+        self.agent_done = [False] * len(self.agent_done)
         return self.grid.cells, self.info, world_stats
 
     def _move_agent(self, new_pos: tuple[int, int], agent_id: int):
