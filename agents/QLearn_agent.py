@@ -44,7 +44,6 @@ class QLearnAgent(BaseAgent):
 
     def take_action(self, observation: np.ndarray, info: None | dict):
 
-        # TODO: How to initialize the Q table
         if self.Q is None:
             print('Initializing Q')
             self.Q = np.zeros([observation.shape[0], observation.shape[1], 2 ** 4, 4])
@@ -55,16 +54,7 @@ class QLearnAgent(BaseAgent):
             self.Q[0, :, :, :] = -1000  # first row we don't want to visit
             self.Q[-1, :, :, :] = -1000  # last row we don't want to visit
 
-            # also set all values for inner walls to low values
-            #indices_walls = np.argwhere(observation == 2)
-            #for idx in indices_walls:
-            #    self.Q[idx[0], idx[1], :, :] = -1000000
-
-            # also set values for dirt already high
-            #indices_dirt = np.argwhere(observation == 3)
-            #for idx in indices_dirt:
-            #    self.Q[idx[0], idx[1], :, :] = 5000
-
+        # sets state that is used
         self.state[0] = info['agent_pos'][0][0]
         self.state[1] = info['agent_pos'][0][1]
         self.state[2] = self.dirt_function(observation, self.state)
@@ -73,24 +63,15 @@ class QLearnAgent(BaseAgent):
         try:
             self.epsilon_decay = self.epsilon #* (1-info['iteration'])
             self.alpha_decay = self.alpha #* (1-info['iteration'])
-            # self.epsilons[self.state[0], self.state[1]] = self.epsilons[self.state[0], self.state[1]] - 0.1
-            # self.epsilon_decay = self.epsilons[self.state[0], self.state[1]]
-            # if self.epsilon_decay < 0.05:
-            #     self.epsilon_decay = 0.05
-            # self.alphas[self.state[0], self.state[1]] = self.alphas[self.state[0], self.state[1]] - 0.001
-            # self.alpha_decay = self.alphas[self.state[0], self.state[1]]
-            # if self.alpha_decay < 0.001:
-            #     self.alpha_decay = 0.001
+
         # If in evaluation no iteration can be found
         except:
             self.epsilon_decay = 0
             self.alpha_decay = 0.001
 
-        # TODO: During random moves: Should we train it with bumping into walls or should we avoid it?
         # take action according to epsilon greedy
         if np.random.uniform(0, 1) < self.epsilon_decay:
             action = randint(0, 3)
-            #action = self.get_action(self.state, observation)
         else:
             action = np.argmax(self.Q[self.state[0], self.state[1], self.state[2], :])
 
@@ -98,26 +79,6 @@ class QLearnAgent(BaseAgent):
         self.new_state = self.get_new_state(observation, action, self.state)
 
         return action
-
-    def get_action(self, state, observation):
-        valid_moves = []
-
-        if observation[state[0]][state[1]+1] not in [1, 2]: # down
-            valid_moves.append(0)
-
-        if observation[state[0]][state[1]-1] not in [1, 2]: # up
-            valid_moves.append(1)
-
-        if observation[state[0]-1][state[1]] not in [1, 2]: # left
-            valid_moves.append(2)
-
-        if observation[state[0]+1][state[1]] not in [1, 2]: # right
-            valid_moves.append(3)
-
-        action = random.choice(valid_moves)
-
-        return action
-
 
     def get_new_state(self, observation, action, state):
         action_map = {0: [state[0], state[1] + 1, state[2]],  # down
@@ -135,7 +96,6 @@ class QLearnAgent(BaseAgent):
             return new_state
 
 
-    # TODO: make flexible for different segmentations of the grid (give number of segmentations as input)
     def dirt_function(self, observation: np.ndarray, state):
         #check which quarter
         height = observation.shape[0]
