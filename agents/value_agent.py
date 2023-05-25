@@ -1,7 +1,7 @@
-"""Greedy Agent.
+"""Value Iteration Agent.
 
-Chooses the best scoring value with no thought about the future.
-"""
+Calculates the values of each state and determines the optimal policy based on
+the most valuable state."""
 
 import numpy as np
 
@@ -69,7 +69,8 @@ class ValueAgent(BaseAgent):
 
         self.spaces = [
             (i, j) for i in range(cols) for j in range(rows)
-            if observation[i, j] in (0, 3, 4)]
+            if observation[i, j] in (0, 3, 4)
+        ]
 
         self.charge_spaces = [
             space for space in self.spaces
@@ -78,7 +79,8 @@ class ValueAgent(BaseAgent):
 
         self.dirt_spaces = [
             space for space in self.spaces
-            if observation[space] == 3]
+            if observation[space] == 3
+        ]
 
         dirt_configs = powerset(self.dirt_spaces)
         complexity = 2**len(self.dirt_spaces)
@@ -91,7 +93,7 @@ class ValueAgent(BaseAgent):
             (space, dirt_left)
             for space in self.spaces
             for dirt_left in dirt_configs
-            if observation[space] in (0, 3, 4)]
+        ]
 
         self.values = {
             state: 0
