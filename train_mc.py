@@ -142,11 +142,15 @@ def train(
                     world_stats["agent"] = str(agent)
                     world_stats["room"] = room_name
                     world_stats["sigma"] = sigma
+                    world_stats["gamma"] = agent.gamma
                     results.append(world_stats)
                     agent.reset_agent_state()
 
     results = pd.DataFrame.from_records(results)
-    results.to_csv(out_experiments / "monte_carlo_results.csv", index=False)
+    if room_name == "simple_grid.grd":
+        results.to_csv(out_experiments / "simple_grid_results.csv", index=False)
+    elif room_name == "multi_room.grd":
+        results.to_csv(out_experiments / "multi_room_results.csv", index=False)
 
 
 if __name__ == "__main__":
