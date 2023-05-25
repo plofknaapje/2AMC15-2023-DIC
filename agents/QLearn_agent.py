@@ -10,7 +10,7 @@ from agents import BaseAgent
 
 
 class QLearnAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, theta=0.001, epsilon=0.5, alpha=0.04):
+    def __init__(self, agent_number: int, gamma: float, epsilon=0.4, alpha=0.08):
         """
         Set agent parameters.
 
@@ -23,7 +23,7 @@ class QLearnAgent(BaseAgent):
         """
         super().__init__(agent_number)
         self.gamma = gamma
-        self.theta = theta
+        
         self.epsilon = epsilon
         self.alpha = alpha
         self.Q = None
@@ -71,8 +71,8 @@ class QLearnAgent(BaseAgent):
 
         # Set alpha and epsilon according to iteration
         try:
-            self.epsilon_decay = self.epsilon * (1-info['iteration'])
-            self.alpha_decay = self.alpha * (1-info['iteration'])
+            self.epsilon_decay = self.epsilon #* (1-info['iteration'])
+            self.alpha_decay = self.alpha #* (1-info['iteration'])
             # self.epsilons[self.state[0], self.state[1]] = self.epsilons[self.state[0], self.state[1]] - 0.1
             # self.epsilon_decay = self.epsilons[self.state[0], self.state[1]]
             # if self.epsilon_decay < 0.05:

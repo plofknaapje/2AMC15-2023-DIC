@@ -64,7 +64,7 @@ def parse_args():
         help="Frames per second to render at. Only used if " "no_gui is not set.",
     )
     p.add_argument(
-        "--iter", type=int, default=10000, help="Number of iterations to go through."
+        "--iter", type=int, default=1000, help="Number of iterations to go through."
     )
     p.add_argument(
         "--random_seed",
@@ -87,13 +87,14 @@ def main(
     random_seed: int,
 ):
     """Main loop of the program."""
-    print(grid_paths)
+
     for grid in grid_paths:
         # Set up the environment and reset it to its initial state
         env = Environment(
             grid,
             no_gui=True,
             n_agents=1,
+            agent_start_pos=None,
             sigma=sigma,
             reward_fn='custom',
             target_fps=fps,
@@ -108,15 +109,14 @@ def main(
             # GreedyAgent(0),
             # RandomAgent(0),
             #ValueAgent(0, gamma=0.9),
-            QLearnAgent(0, gamma=0.9, epsilon=0.9)
+            QLearnAgent(0, gamma=0.08, epsilon=0.4)
         ]
 
         # Iterate through each agent for `iters` iterations
-        TOTAL_ITERATIONS = 100
+        TOTAL_ITERATIONS = 20000
 
         for agent in agents:
             for i in range(TOTAL_ITERATIONS):
-                print(i)
                 for _ in trange(iters):
                     # Agent takes an action based on the latest observation and info
                     info['iteration'] = i/TOTAL_ITERATIONS
@@ -125,16 +125,15 @@ def main(
                     # The action is performed in the environment
                     obs, reward, terminated, info = env.step([action])
 
-                    agent.process_reward(action, reward)
                     # If the agent is terminated, we reset the env.
                     if terminated:
+                        obs, info, world_stats = env.reset()
                         break
                     agent.process_reward(action, reward)
                 obs, info, world_stats = env.reset()
                 print(world_stats)
 
             info['iteration'] = 0
-            print(agent.Q[:, :, 1, 1])
             Environment.evaluate_agent(grid, [agent], 1000, out, 0.2)
 
 
