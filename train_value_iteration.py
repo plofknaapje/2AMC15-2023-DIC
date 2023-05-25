@@ -1,13 +1,6 @@
-"""Train.
-
-Train your RL Agent in this file.
-Feel free to modify this file as you need.
-
-In this example training script, we use command line arguments. Feel free to
-change this to however you want it to work.
 """
-import os
-from argparse import ArgumentParser
+Trains the Value Iteration Agent and reports the result.
+"""
 from pathlib import Path
 from tqdm import trange
 
@@ -61,10 +54,9 @@ def train(
     """
 
     results = []
-    for grid_name in grid_paths:
+    for grid in grid_paths:
         # Set up the environment and reset it to its initial state
-        grid = Path(grid_name)
-        room_name = grid_name.split("/")[1]
+        room_name = grid.name
 
         env = Environment(
             grid,
@@ -130,7 +122,8 @@ def train(
 
 if __name__ == "__main__":
     train(
-        grid_paths=["grid_configs/simple_grid.grd", "grid_configs/multi_room.grd"],
+        grid_paths=[Path("grid_configs/simple_grid.grd"),
+                    Path("grid_configs/multi_room.grd")],
         no_gui=True,
         iters=100,
         fps=10,
