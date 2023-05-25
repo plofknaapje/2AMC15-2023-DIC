@@ -7,7 +7,7 @@ import random
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from time import sleep, time
+from time import time, sleep
 from warnings import warn
 
 import numpy as np
@@ -23,6 +23,8 @@ try:
     from world.gui import EnvironmentGUI
     from world.path_visualizer import visualize_path
 except ModuleNotFoundError:
+    from os import path
+    from os import pardir
     import sys
     from os import pardir, path
     
@@ -94,15 +96,15 @@ class Environment:
         self.grid = None
         self.no_gui = no_gui
         if target_fps <= 0:
-            self.target_spf = 0.0
+            self.target_spf = 0.
         else:
-            self.target_spf = 1.0 / target_fps
+            self.target_spf = 1. / target_fps
         self.gui = None
         
         # Set up initial agent positions
-        self.n_agents = n_agents  # Number of active agents
-        self.agent_pos = None  # Current agent positions
-        self.agent_start_pos = agent_start_pos  # Where agents initially start
+        self.n_agents = n_agents                 # Number of active agents
+        self.agent_pos = None                    # Current agent positions
+        self.agent_start_pos = agent_start_pos   # Where agents initially start
         self.agent_done = [False] * n_agents
         
         # Set up reward function
@@ -110,6 +112,7 @@ class Environment:
             warn("No reward function provided. Using default reward.")
             self.reward_fn = self._default_reward_function
         else:
+            self.reward_fn = self._custom_reward_function
             self.reward_fn = self._custom_reward_function
         self.info = self._reset_info()
         self.world_stats = self._reset_world_stats()
@@ -175,15 +178,13 @@ class Environment:
                 else:
                     # Agent is placed on walls/obstacle/dirt/charger
                     raise ValueError(
-                        "Attempted to place agent on top of wall or " "charger"
-                    )
+                        "Attempted to place agent on top of wall or "
+                        "charger")
             self.agent_pos = deepcopy(self.agent_start_pos)
         else:
             # No positions were given. We place agents randomly.
-            warn(
-                "No initial agent positions given. Randomly placing agents "
-                "on the grid."
-            )
+            warn("No initial agent positions given. Randomly placing agents "
+                 "on the grid.")
             for _ in range(self.n_agents):
                 # First get all empty positions
                 zeros = np.where(self.grid.cells == 0)
@@ -243,7 +244,7 @@ class Environment:
                 case "no_gui":
                     self.no_gui = v
                 case "target_fps":
-                    self.target_spf = 1.0 / v
+                    self.target_spf = 1. / v
                 case _:
                     raise ValueError(
                         f"{k} is not one of the possible " f"keyword arguments."
@@ -289,7 +290,6 @@ class Environment:
             if agent_id == other_agent_id:
                 continue
             if new_pos == self.agent_pos[other_agent_id]:
-                print("Move goes into another agent")
                 self.world_stats["total_failed_moves"] += 1
                 return
             
@@ -299,9 +299,6 @@ class Environment:
                 self.info["agent_moved"][agent_id] = True
                 self.world_stats["total_agent_moves"] += 1
             case 1 | 2:  # Moved to a wall or obstacle
-                print(
-                    f"Agent {agent_id} tried to move into a wall at {new_pos} from {self.agent_pos[agent_id]}"
-                )
                 self.world_stats["total_failed_moves"] += 1
                 pass
             case 3:  # Moved to a dirt tile
@@ -321,7 +318,6 @@ class Environment:
                     self.world_stats["total_agents_at_charger"] += 1
                 # Otherwise, the agent can't move and nothing happens
                 else:
-                    print("Room is not clean yet so charging is not allowed.")
                     self.world_stats["total_failed_moves"] += 1
             case _:
                 raise ValueError(
@@ -369,10 +365,8 @@ class Environment:
                 )
                 
         if not self.environment_ready:
-            raise ValueError(
-                "reset() has not been called yet. "
-                "The environment still needs to be initialized."
-            )
+            raise ValueError("reset() has not been called yet. "
+                             "The environment still needs to be initialized.")
         # Verify that the number of actions and the number of agents is the
         # same
         if len(actions) != self.n_agents:
@@ -399,26 +393,23 @@ class Environment:
                 actual_action = random.randint(0, 4)
             match actual_action:
                 case 0:  # Move down
-                    new_pos = (
-                        self.agent_pos[i][0],
-                        min(max_y, self.agent_pos[i][1] + 1),
-                    )
+                    new_pos = (self.agent_pos[i][0],
+                               min(max_y, self.agent_pos[i][1] + 1))
                 case 1:  # Move up
-                    new_pos = (self.agent_pos[i][0], max(0, self.agent_pos[i][1] - 1))
+                    new_pos = (self.agent_pos[i][0],
+                               max(0, self.agent_pos[i][1] - 1))
                 case 2:  # Move left
-                    new_pos = (max(0, self.agent_pos[i][0] - 1), self.agent_pos[i][1])
+                    new_pos = (max(0, self.agent_pos[i][0] - 1),
+                               self.agent_pos[i][1])
                 case 3:  # Move right
-                    new_pos = (
-                        min(max_x, self.agent_pos[i][0] + 1),
-                        self.agent_pos[i][1],
-                    )
+                    new_pos = (min(max_x, self.agent_pos[i][0] + 1),
+                               self.agent_pos[i][1])
                 case 4:  # Stand still
-                    new_pos = (self.agent_pos[i][0], self.agent_pos[i][1])
+                    new_pos = (self.agent_pos[i][0],
+                               self.agent_pos[i][1])
                 case _:
-                    raise ValueError(
-                        f"Provided action {action} for agent {i} "
-                        f"is not one of the possible actions."
-                    )
+                    raise ValueError(f"Provided action {action} for agent {i} "
+                                     f"is not one of the possible actions.")
             self._move_agent(new_pos, i)
             
         # Update the grid with the new agent positions and calculate the reward
@@ -552,9 +543,8 @@ class Environment:
                 evaluation. If False, only saves the images.
         """
         if not out_dir.exists():
-            warn(
-                "Evaluation output directory does not exist. Creating the " "directory."
-            )
+            warn("Evaluation output directory does not exist. Creating the "
+                 "directory.")
             out_dir.mkdir(parents=True, exist_ok=True)
         env = Environment(
             grid_fp=grid_fp,
@@ -577,7 +567,8 @@ class Environment:
             max_steps, desc=f"Evaluating agent" f"{'s' if len(agents) > 1 else ''}"
         ):
             # Get the agent actions
-            actions = [agent.take_action(obs, info) for agent in agents]
+            actions = [agent.take_action(obs, info)
+                       for agent in agents]
             # Take a step in the environment
             obs, _, terminated, info = env.step(actions)
         
@@ -623,7 +614,7 @@ class Environment:
         return world_stats
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # This is sample code to test a single grid.
     base_grid_fp = Path("grid_configs/rooms-1.grd")
     envi = Environment(base_grid_fp, False, 1, target_fps=5)
