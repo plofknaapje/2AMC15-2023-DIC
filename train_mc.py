@@ -151,7 +151,7 @@ def train(
 
 if __name__ == "__main__":
     train(
-        grid_paths=[Path("grid_configs/simple_grid.grd")],
+        grid_paths=[Path("grid_configs/multi_room.grd")],
                     # Path("grid_configs/multi_room.grd")]
         no_gui=True,
         iters=1000,
