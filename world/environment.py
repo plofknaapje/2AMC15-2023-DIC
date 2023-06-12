@@ -25,20 +25,20 @@ try:
 except ModuleNotFoundError:
     import sys
     from os import pardir, path
-
+    
     root_path = path.abspath(
         path.join(path.join(path.abspath(__file__), pardir), pardir)
     )
-
+    
     if root_path not in sys.path:
         sys.path.append(root_path)
-
+        
     from agents import BaseAgent
     from world.grid import Grid
     from world.gui import EnvironmentGUI
     from world.path_visualizer import visualize_path
-
-
+    
+    
 class Environment:
     def __init__(
         self,
@@ -89,7 +89,7 @@ class Environment:
             raise FileNotFoundError(f"Grid {grid_fp} does not exist.")
         # Load the grid from the file
         self.grid_fp = grid_fp
-
+        
         # Set up the environment as a blank state.
         self.grid = None
         self.no_gui = no_gui
@@ -98,13 +98,13 @@ class Environment:
         else:
             self.target_spf = 1.0 / target_fps
         self.gui = None
-
+        
         # Set up initial agent positions
         self.n_agents = n_agents  # Number of active agents
         self.agent_pos = None  # Current agent positions
         self.agent_start_pos = agent_start_pos  # Where agents initially start
         self.agent_done = [False] * n_agents
-
+        
         # Set up reward function
         if reward_fn is None:
             warn("No reward function provided. Using default reward.")
@@ -113,11 +113,11 @@ class Environment:
             self.reward_fn = self._custom_reward_function
         self.info = self._reset_info()
         self.world_stats = self._reset_world_stats()
-
+        
         self.environment_ready = False
         self.reset()
-
-
+        
+        
     def _reset_info(self) -> dict:
         """Resets the info dictionary.
 
@@ -143,7 +143,7 @@ class Environment:
             "agent_charging": self.agent_done,
             "agent_pos": self.agent_pos,
         }
-
+    
     @staticmethod
     def _reset_world_stats() -> dict:
         return {
@@ -156,7 +156,7 @@ class Environment:
             "failed_moves_fraction":0,
             "total_reward":0
         }
-
+    
     def _initialize_agent_pos(self):
         """Initializes agent position from the givin initial variables.
 
@@ -190,7 +190,7 @@ class Environment:
                 idx = random.randint(0, len(zeros[0]) - 1)
                 agent_pos.append((zeros[0][idx], zeros[1][idx]))
             self.agent_pos = agent_pos
-
+            
     def get_observation(self) -> [np.ndarray, dict]:
         """Gets the current observation and information.
 
@@ -200,7 +200,7 @@ class Environment:
               'agent_charging', 'agent_pos']
         """
         return self.grid.cells, self.info
-
+    
     def reset(self, **kwargs) -> [np.ndarray, dict, dict]:
         """Reset the environment to an initial state.
 
@@ -248,7 +248,7 @@ class Environment:
                     raise ValueError(
                         f"{k} is not one of the possible " f"keyword arguments."
                     )
-
+                    
         if self.agent_start_pos is not None:
             if len(self.agent_start_pos) != self.n_agents:
                 raise ValueError(
@@ -256,7 +256,7 @@ class Environment:
                     f"agree with number of starting positions "
                     f"{len(self.agent_start_pos)}."
                 )
-
+                
         self.grid = Grid.load_grid_file(self.grid_fp)
         self._initialize_agent_pos()
         self.info = self._reset_info()
@@ -267,10 +267,11 @@ class Environment:
         else:
             if self.gui is not None:
                 self.gui.close()
-
+                
         self.environment_ready = True
+        self.agent_done = [False] * len(self.agent_done)
         return self.grid.cells, self.info, world_stats
-
+    
     def _move_agent(self, new_pos: tuple[int, int], agent_id: int):
         """Moves the agent, if possible.
 
@@ -291,7 +292,7 @@ class Environment:
                 print("Move goes into another agent")
                 self.world_stats["total_failed_moves"] += 1
                 return
-
+            
         match self.grid.cells[new_pos]:
             case 0:  # Moved to an empty tile
                 self.agent_pos[agent_id] = new_pos
@@ -328,7 +329,7 @@ class Environment:
                     f"{self.grid.cells[new_pos]} at position "
                     f"{new_pos}."
                 )
-
+                
     def step(self, actions: list[int]) -> [np.ndarray, float, bool, dict]:
         """This function makes the agent take a step on the grid.
 
@@ -366,7 +367,7 @@ class Environment:
                 self.gui.render(
                     self.grid.cells, self.agent_pos, paused_info, is_single_step
                 )
-
+                
         if not self.environment_ready:
             raise ValueError(
                 "reset() has not been called yet. "
@@ -379,17 +380,17 @@ class Environment:
                 f"Number of actions provided is {len(actions)}, "
                 f"but the number of agents is {self.n_agents}."
             )
-
+            
         self.info = self._reset_info()
-
+        
         max_x = self.grid.n_cols - 1
         max_y = self.grid.n_rows - 1
-
+        
         for i, action in enumerate(actions):
             if self.agent_done[i]:
                 # The agent is already on the charger, so it is done.
                 continue
-
+            
             # Add stochasticity into the agent action
             val = random.random()
             if val > self.sigma:
@@ -419,25 +420,25 @@ class Environment:
                         f"is not one of the possible actions."
                     )
             self._move_agent(new_pos, i)
-
+            
         # Update the grid with the new agent positions and calculate the reward
         reward = self.reward_fn(self.grid, self.info)
-
+        
         # Get total reward
         self.world_stats["total_reward"] += reward
-
+        
         terminal_state = sum(self.agent_done) == self.n_agents
         if terminal_state:
             self.environment_ready = False
-
+            
         if not self.no_gui:
             time_to_wait = self.target_spf - (time() - start_time)
             if time_to_wait > 0:
                 sleep(time_to_wait)
             self.gui.render(self.grid.cells, self.agent_pos, self.info, is_single_step)
-
+            
         return self.grid.cells, reward, terminal_state, self.info
-
+    
     @staticmethod
     def _default_reward_function(grid: Grid, info: dict) -> float:
         """This is the default reward function.
@@ -459,10 +460,10 @@ class Environment:
             action.
         """
         return float(sum(info["dirt_cleaned"]))
-
-
-
-
+    
+    
+    
+    
     @staticmethod
     def _custom_reward_function(grid: Grid, info: dict) -> float:
         """This is the custom reward function.
@@ -477,37 +478,37 @@ class Environment:
             action.
         """
         dirt_reward = sum(info["dirt_cleaned"]) * 5
-
+        
         if info["agent_moved"] == [False] and info["agent_charging"][0] != True:
             bumped_reward = -1
         else:
             bumped_reward = 0
-
+            
         if info["agent_moved"] == [True] and dirt_reward == 0:
             moving_reward = -1
         else:
             moving_reward = 0
-
+            
         if grid.sum_dirt() == 0 and info["agent_charging"][0]:
             charging_reward = 10
         elif info["agent_charging"][0]:
             charging_reward = -1
         else:
             charging_reward = 0
-
+            
         # print(grid.sum_dirt(), info["agent_charging"][0])
         # print('DIRT REWARD:', dirt_reward)
         # print('BUMPED REWARD:', bumped_reward)
         # print('CHARGING REWARD:', charging_reward)
         # print('MOVED REWARD: ', moving_reward)
-
+            
         total_reward = dirt_reward + bumped_reward + charging_reward + moving_reward
-
+        
         return total_reward
-
-
-
-
+    
+    
+    
+    
     @staticmethod
     def evaluate_agent(
         grid_fp: Path,
@@ -566,12 +567,12 @@ class Environment:
             reward_fn='custom'
         )
         obs, info = env.get_observation()
-
+        
         initial_grid = np.copy(obs)
-
+        
         # Set initial positions for the agent
         agent_paths = [[pos] for pos in info["agent_pos"]]
-
+        
         for _ in trange(
             max_steps, desc=f"Evaluating agent" f"{'s' if len(agents) > 1 else ''}"
         ):
@@ -579,29 +580,29 @@ class Environment:
             actions = [agent.take_action(obs, info) for agent in agents]
             # Take a step in the environment
             obs, _, terminated, info = env.step(actions)
-
+        
             # Save the new agent locations
             for i, pos in enumerate(info["agent_pos"]):
                 agent_paths[i].append(pos)
-
+                
             if terminated:
                 break
-
+        
         summed_dirt = env.grid.sum_dirt()
         obs, info, world_stats = env.reset()
-
+        
         world_stats["dirt_remaining"] = summed_dirt
-
+        
         # Get custom evaluation metrics
         if world_stats["total_dirt_cleaned"]:
             world_stats["steps_per_dirt"] = (world_stats["total_agent_moves"] + world_stats["total_failed_moves"]) / world_stats["total_dirt_cleaned"]
         else:
             world_stats["steps_per_dirt"] = -1
         world_stats["failed_moves_fraction"] = world_stats["total_failed_moves"] / (world_stats["total_agent_moves"] + world_stats["total_failed_moves"])
-
+        
         # Generate path images
         path_images = visualize_path(initial_grid, agent_paths)
-
+        
         print("Evaluation complete. Results:")
         # File name is the current date and time
         file_name = datetime.now().strftime("%Y-%m-%d__%H-%M-%S")
@@ -610,7 +611,7 @@ class Environment:
             for key, value in world_stats.items():
                 f.write(f"{key}: {value}\n")
                 print(f"{key}: {value}")
-
+                
         # Save the images
         for i, img in enumerate(path_images):
             img_name = f"{file_name}_agent-{i}"
@@ -627,19 +628,19 @@ if __name__ == "__main__":
     base_grid_fp = Path("grid_configs/rooms-1.grd")
     envi = Environment(base_grid_fp, False, 1, target_fps=5)
     observe, inf = envi.get_observation()
-
+    
     # Load the random agent
     from agents.random_agent import RandomAgent
-
+    
     test_agent = RandomAgent(agent_number=0)
-
+    
     # Take 1000 steps with the GUI
     for t in trange(1000):
         act = [test_agent.take_action(observe, inf)]
         observe, r, term_state, inf = envi.step(act)
         if term_state:
             break
-
+        
     # Take 10000 steps without the GUI
     observe, inf, stats = envi.reset(no_gui=True)
     print(stats)
@@ -648,5 +649,5 @@ if __name__ == "__main__":
         observe, r, term_state, inf = envi.step(act)
         if term_state:
             break
-
+        
     print(envi.reset()[2])  # Print the world stats

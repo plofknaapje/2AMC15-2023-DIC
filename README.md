@@ -5,16 +5,33 @@ This is the repository containing the challenge environment code.
 
 ## Quickstart
 
-1. Create an agent which inherits from the `BaseAgent` class
-2. Add the agents you want to test to `train.py`
-   - There are 2 places to add you agent. Look for the comment `# Add your agent here` for where to add your agent.
-3. Run `$ python train.py grid_configs/rooms-1.grd --out results/` to start training!
+Before running:
+Make sure you have the project running in a virtual environment (recomanded venv) and install the requirements.txt file:
 
-`train.py` is just an example training script. 
-Feel free to modify it as necessary.
-In our basic example, we use command line arguments to select options for it.
-This may not be convenient for you and you can choose to replace this training script with whatever you want.
-By default, its usage is:
+```commandline
+python3 -m venv venv
+source venv/bin/activate        #macOS/Linux
+venv\Scripts\activate           #Windows
+pip install -r requirements.txt
+```
+
+We implemented the following agents and coresponding train files:
+1. Value Iteration agent --> `train_value_iteration.py`
+2. Q-Learning agent --> `train_QLearning.py`
+3. Monte-Carlo agent --> `train_mc.py`
+
+In order to run each you simply need to run each of the above mentioned `.py` files.
+```commandline
+$ python train_value_iteration.py
+$ python train_QLearning.py
+$ python train_mc.py
+```
+You can also use the `train_optimal_paths.py` or `train_with_optimal_example.py` files to compare our agent's performance to the optimal path that each could take.
+```commandline
+$ python train_optimal_paths.py
+```
+
+## Original README follows:
 
 ```bash
 usage: train.py [-h] [--no_gui] [--sigma SIGMA] [--fps FPS] [--iter ITER]

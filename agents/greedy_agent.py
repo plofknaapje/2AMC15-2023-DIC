@@ -32,6 +32,6 @@ class GreedyAgent(BaseAgent):
             return 3
         else:
             return randint(0, 4)
-        
+
     def __str__(self):
         return f"GreedyAgent({self.agent_number})"
