@@ -1,4 +1,5 @@
 import numpy as np
+from world import grid
 from grid import Grid
 from pathlib import Path
 
@@ -13,13 +14,14 @@ def agent_vision(loc: tuple, grid: Grid, vis_range: int) -> np.ndarray:
 
     Returns:
         np.ndarray: vision map of the agent using -1 for unseen areas.
-    """    """"""
+    """
     loc_arr = np.array(loc)
     center = np.array([vis_range, vis_range])
 
     vision = np.full(
         shape=(vis_range * 2 + 1, vis_range * 2 + 1),
         fill_value=-1)
+    print(vision)
     vision[center[0], center[1]] = grid.cells[loc]
 
     # Straight lines from center
