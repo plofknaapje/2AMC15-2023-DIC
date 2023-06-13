@@ -66,11 +66,12 @@ def train(
             sigma=sigma,
             target_fps=fps,
             random_seed=random_seed,
+            reward_fn='custom',
         )
         obs, info = env.get_observation()
         # Add agents with different configurations here
         agents = [
-            GreedyAgent(0),
+            # GreedyAgent(0),
             ValueAgent(0, gamma=0.9),
             ValueAgent(0, gamma=0.6)
         ]

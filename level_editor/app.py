@@ -15,6 +15,7 @@ from flask_socketio import SocketIO
 try:
     from world import Grid
     from level_editor import GRID_CONFIGS_FP
+    from level_editor import GRID_CONFIGS_FP
 except ModuleNotFoundError:
     from os import path
     from os import pardir
@@ -28,6 +29,7 @@ except ModuleNotFoundError:
         sys.path.append(root_path)
 
     from world import Grid
+    from level_editor import GRID_CONFIGS_FP
     from level_editor import GRID_CONFIGS_FP
 
 
