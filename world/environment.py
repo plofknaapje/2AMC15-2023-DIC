@@ -10,6 +10,7 @@ from pathlib import Path
 from time import sleep, time
 from warnings import warn
 
+import json
 import numpy as np
 from tqdm import trange
 
@@ -43,6 +44,7 @@ class Environment:
     def __init__(
         self,
         grid_fp: Path,
+        dynamics_fp: Path,
         no_gui: bool = False,
         n_agents: int = 1,
         sigma: float = 0.0,
@@ -89,6 +91,7 @@ class Environment:
             raise FileNotFoundError(f"Grid {grid_fp} does not exist.")
         # Load the grid from the file
         self.grid_fp = grid_fp
+        self.dynamics_fp = dynamics_fp
         
         # Set up the environment as a blank state.
         self.grid = None
@@ -116,6 +119,50 @@ class Environment:
         
         self.environment_ready = False
         self.reset()
+        if self.dynamics_fp is not None:
+            with open(self.dynamics_fp) as file:
+                self.dynamic_obs = json.load(file)
+            self.dynamics()
+
+
+    def dynamics(self):
+        """Move the obstacles in the grid if there are any moveable objects.
+
+        X and Y of the obstacle identify the top left corner
+        The width and height determine the size of the object
+        Down and right determine how far the object can move down and to the right
+
+        """
+
+        obstacles = self.dynamic_obs['obstacles']
+        agent_pos = self.info["agent_pos"]
+
+        for obstacle in obstacles:
+            ob_x = obstacle['x']
+            ob_y = obstacle['y']
+            down = obstacle['down']
+            right = obstacle['right']
+
+
+            # determine the new (target) location of the obstacle
+            pos_down = random.randint(0, down)
+            pos_right = random.randint(0, right)
+            obstacle_pos = []
+            for i in range(obstacle['width']):
+                for j in range(obstacle['height']):
+                    obstacle_pos.append((ob_x+pos_right+i, ob_y+pos_down+j))
+
+            # if agent does not block the move
+            if agent_pos not in obstacle_pos:
+                # remove old obstacle
+                for i in range(right + obstacle['width']):
+                    for j in range(down + obstacle['height']):
+                        self.grid.cells[ob_x+i, ob_y+j] = 0
+
+                # place new obstacle
+                for pos in obstacle_pos:
+                    x, y = pos
+                    self.grid.cells[x, y] = 2
         
         
     def _reset_info(self) -> dict:
@@ -420,6 +467,10 @@ class Environment:
                         f"is not one of the possible actions."
                     )
             self._move_agent(new_pos, i)
+
+        # After agent makes a move change the obstacles from positions
+        if self.dynamics_fp is not None:
+            self.dynamics()
             
         # Update the grid with the new agent positions and calculate the reward
         reward = self.reward_fn(self.grid, self.info)

@@ -38,6 +38,7 @@ except ModuleNotFoundError:
 
 def main(
     grid_paths: list[Path],
+    dynamics_fp: Path,
     no_gui: bool,
     iters: int,
     fps: int,
@@ -52,7 +53,8 @@ def main(
         # Set up the environment and reset it to its initial state
         env = Environment(
             grid,
-            no_gui=True,
+            dynamics_fp=dynamics_fp,
+            no_gui=False,
             n_agents=1,
             agent_start_pos=None,
             sigma=sigma,
@@ -105,9 +107,9 @@ def main(
 
 if __name__ == "__main__":
     main(
-        grid_paths=[Path("grid_configs/simple_grid.grd"),
-                    Path("grid_configs/multi_room.grd")],
-        no_gui=True,
+        grid_paths=[Path("grid_configs/test_dynamics.grd")],
+        dynamics_fp=Path("dynamic_env_config/test.json"),
+        no_gui=False,
         iters=100,
         fps=10,
         sigma=0,

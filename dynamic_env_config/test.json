@@ -1,0 +1,25 @@
+{
+  "obstacles": [
+    {
+      "id": 1,
+      "x": 4,
+      "y": 4,
+      "width": 1,
+      "height": 1,
+      "down": 4,
+      "right": 4
+
+    },
+
+    {
+      "id": 1,
+      "x": 8,
+      "y": 8,
+      "width": 1,
+      "height": 1,
+      "down": 2,
+      "right": 2
+
+    }
+  ]
+}
