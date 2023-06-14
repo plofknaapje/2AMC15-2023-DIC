@@ -208,7 +208,7 @@ class Environment:
         Returns:
             - observation as an np.ndarray
             - info as a dict with keys ['dirt_cleaned', 'agent_moved',
-              'agent_charging', 'agent_pos']
+              'agent_charging', 'agent_pos', 'agent_pos_arr', 'dirt_vecs']
         """
         # Only update once an agent wants the observations.
         self.info["agent_pos_arr"] = self.coord_to_array()
