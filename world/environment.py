@@ -289,7 +289,7 @@ class Environment:
             if agent_id == other_agent_id:
                 continue
             if new_pos == self.agent_pos[other_agent_id]:
-                print("Move goes into another agent")
+                # print("Move goes into another agent")
                 self.world_stats["total_failed_moves"] += 1
                 return
 
@@ -299,9 +299,9 @@ class Environment:
                 self.info["agent_moved"][agent_id] = True
                 self.world_stats["total_agent_moves"] += 1
             case 1 | 2:  # Moved to a wall or obstacle
-                print(
-                    f"Agent {agent_id} tried to move into a wall at {new_pos} from {self.agent_pos[agent_id]}"
-                )
+                # print(
+                #     f"Agent {agent_id} tried to move into a wall at {new_pos} from {self.agent_pos[agent_id]}"
+                # )
                 self.world_stats["total_failed_moves"] += 1
                 pass
             case 3:  # Moved to a dirt tile
@@ -321,7 +321,7 @@ class Environment:
                     self.world_stats["total_agents_at_charger"] += 1
                 # Otherwise, the agent can't move and nothing happens
                 else:
-                    print("Room is not clean yet so charging is not allowed.")
+                    # print("Room is not clean yet so charging is not allowed.")
                     self.world_stats["total_failed_moves"] += 1
             case _:
                 raise ValueError(
@@ -643,11 +643,11 @@ if __name__ == "__main__":
 
     # Take 10000 steps without the GUI
     observe, inf, stats = envi.reset(no_gui=True)
-    print(stats)
+    # print(stats)
     for t in trange(100000):
         act = [test_agent.take_action(observe, inf)]
         observe, r, term_state, inf = envi.step(act)
         if term_state:
             break
 
-    print(envi.reset()[2])  # Print the world stats
+    # print(envi.reset()[2])  # Print the world stats

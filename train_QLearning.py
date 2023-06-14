@@ -65,16 +65,18 @@ def main(
         # Set up the agents from scratch for every grid
         # Add your agents here
         agents = [
-            QLearnAgent(0, gamma=0.9, epsilon=0.4),
-            QLearnAgent(0, gamma=0.6, epsilon=0.4)
+            # QLearnAgent(0, gamma=0.9, epsilon=0.4),       #OLD VERSION
+            # QLearnAgent(0, gamma=0.6, epsilon=0.4),       #OLD VERSION
+            QLearnAgent(1, allowed_actions=list(range(4)), gamma=0.9, training=True)
+            QLearnAgent(1, allowed_actions=list(range(4)), gamma=0.6, training=True)
         ]
 
         # Iterate through each agent for `iters` iterations
-        TOTAL_ITERATIONS = 20000
+        TOTAL_ITERATIONS = 2000
 
         for agent in agents:
             for i in range(TOTAL_ITERATIONS):
-                print(i)
+                # print(i)
                 for _ in trange(iters):
                     # Agent takes an action based on the latest observation and info
                     info['iteration'] = i/TOTAL_ITERATIONS
@@ -83,13 +85,13 @@ def main(
                     # The action is performed in the environment
                     obs, reward, terminated, info = env.step([action])
 
-                    agent.process_reward(action, reward)
+                    agent.process_reward(obs, info, reward, terminated)
 
                     # If the agent is terminated, we reset the env.
                     if terminated:
                         break
                 obs, info, world_stats = env.reset()
-                print(world_stats)
+                # print(world_stats)
 
             info['iteration'] = 0
             Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(1, 1)])
