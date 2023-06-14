@@ -122,8 +122,41 @@ class Environment:
         if self.dynamics_fp is not None:
             with open(self.dynamics_fp) as file:
                 self.dynamic_obs = json.load(file)
+            self.check_dynamics()
             self.dynamics()
 
+    def check_dynamics(self):
+        """Check feasibility of the obstacles in the grid if there are any moveable objects.
+
+        First checks whether the objects stay in bound of the grid.
+
+        Then it checks if the space in moves in is free from other obstacles/dirt/chargers
+
+         X and Y of the obstacle identify the top left corner
+         The width and height determine the size of the object
+         Down and right determine how far the object can move down and to the right
+
+         """
+        obstacles = self.dynamic_obs['obstacles']
+
+        grid = deepcopy(self.grid.cells)
+
+        for obstacle in obstacles:
+            ob_x = obstacle['x']
+            ob_y = obstacle['y']
+
+            x_reach = obstacle['right'] + obstacle['width']
+            y_reach = obstacle['down'] + obstacle['height']
+
+            if ob_x+x_reach > len(grid[0]) or ob_y+y_reach > len(grid):
+                raise Exception('Obstacles out of bounds for current grid')
+
+            for i in range(x_reach):
+                for j in range(y_reach):
+                    if grid[ob_x + i, ob_y + j] != 0:
+                        raise Exception('One or more obstacles collide or interfere with dirt/charger')
+                    else:
+                        grid[ob_x + i, ob_y + j] = 2
 
     def dynamics(self):
         """Move the obstacles in the grid if there are any moveable objects.
@@ -136,6 +169,9 @@ class Environment:
 
         obstacles = self.dynamic_obs['obstacles']
         agent_pos = self.info["agent_pos"]
+
+        if self.grid.cells[agent_pos[0][0], agent_pos[0][1]] == 2:
+            raise Exception('Agent in obstacle')
 
         for obstacle in obstacles:
             ob_x = obstacle['x']
@@ -153,7 +189,7 @@ class Environment:
                     obstacle_pos.append((ob_x+pos_right+i, ob_y+pos_down+j))
 
             # if agent does not block the move
-            if agent_pos not in obstacle_pos:
+            if agent_pos[0] not in obstacle_pos:
                 # remove old obstacle
                 for i in range(right + obstacle['width']):
                     for j in range(down + obstacle['height']):
@@ -163,7 +199,9 @@ class Environment:
                 for pos in obstacle_pos:
                     x, y = pos
                     self.grid.cells[x, y] = 2
-        
+
+        if self.grid.cells[agent_pos[0][0], agent_pos[0][1]] == 2:
+            raise Exception('Agent in obstacle')
         
     def _reset_info(self) -> dict:
         """Resets the info dictionary.
@@ -468,10 +506,6 @@ class Environment:
                     )
             self._move_agent(new_pos, i)
 
-        # After agent makes a move change the obstacles from positions
-        if self.dynamics_fp is not None:
-            self.dynamics()
-            
         # Update the grid with the new agent positions and calculate the reward
         reward = self.reward_fn(self.grid, self.info)
         
@@ -487,6 +521,10 @@ class Environment:
             if time_to_wait > 0:
                 sleep(time_to_wait)
             self.gui.render(self.grid.cells, self.agent_pos, self.info, is_single_step)
+
+        # After agent makes a move change the obstacles from positions
+        if self.dynamics_fp is not None:
+            self.dynamics()
             
         return self.grid.cells, reward, terminal_state, self.info
     

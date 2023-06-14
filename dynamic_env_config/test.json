@@ -2,21 +2,31 @@
   "obstacles": [
     {
       "id": 1,
-      "x": 4,
-      "y": 4,
-      "width": 1,
+      "x": 1,
+      "y": 3,
+      "width": 5,
       "height": 1,
-      "down": 4,
-      "right": 4
+      "down": 3,
+      "right": 0
+
+    },
+     {
+      "id": 2,
+      "x": 8,
+      "y": 9,
+      "width": 1,
+      "height": 5,
+      "down": 0,
+      "right": 3
 
     },
 
     {
-      "id": 1,
-      "x": 8,
-      "y": 8,
-      "width": 1,
-      "height": 1,
+      "id": 2,
+      "x":10,
+      "y": 3,
+      "width": 2,
+      "height": 2,
       "down": 2,
       "right": 2
 
