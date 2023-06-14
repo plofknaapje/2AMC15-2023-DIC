@@ -117,6 +117,15 @@ class Environment:
         self.environment_ready = False
         self.reset()
 
+        dirt_tiles = [
+            (i, j) for i in range(self.grid.n_cols) for j in range(self.grid.n_rows)
+            if self.grid.cells[i, j] == 3
+        ]
+        if len(dirt_tiles) >= 30:
+            raise ValueError("Environment does not support more than 30 dirt!")
+        
+        self.dirt_dict = {coord: i for i, coord in enumerate(dirt_tiles)}
+
 
     def _reset_info(self) -> dict:
         """Resets the info dictionary.
@@ -142,6 +151,8 @@ class Environment:
             "agent_moved": [False] * self.n_agents,
             "agent_charging": self.agent_done,
             "agent_pos": self.agent_pos,
+            "agent_pos_arr": [None] * self.n_agents,
+            "dirt_vecs": [np.zeros(30)] * self.n_agents 
         }
 
     @staticmethod
@@ -199,7 +210,18 @@ class Environment:
             - info as a dict with keys ['dirt_cleaned', 'agent_moved',
               'agent_charging', 'agent_pos']
         """
+        # Only update once an agent wants the observations.
+        self.info["agent_pos_arr"] = self.coord_to_array()
         return self.grid.cells, self.info
+    
+    def coord_to_array(self) -> [np.ndarray]:
+        # Transform coordinate representation to a 1 on a 0-matrix.
+        arrs = []
+        for pos in self.info["agent_pos"]:
+            matrix = np.zeros_like(self.grid.cells)
+            matrix[pos] = 1
+            arrs.append(matrix)
+        return arrs
 
     def reset(self, **kwargs) -> [np.ndarray, dict, dict]:
         """Reset the environment to an initial state.
@@ -311,6 +333,8 @@ class Environment:
                 self.world_stats["total_dirt_cleaned"] += 1
                 self.info["agent_moved"][agent_id] = True
                 self.world_stats["total_agent_moves"] += 1
+                # Record the encoded value of all cleaned dirts
+                self.info["dirt_vecs"][agent_id][self.dirt_dict[new_pos]] = 1
             case 4:  # Moved to the charger
                 # Moving to charger is only permitted if the room is clean.
                 # NOTE: This is a pending design decision.
@@ -628,6 +652,7 @@ if __name__ == "__main__":
     base_grid_fp = Path("grid_configs/rooms-1.grd")
     envi = Environment(base_grid_fp, False, 1, target_fps=5)
     observe, inf = envi.get_observation()
+    print(inf)
 
     # Load the random agent
     from agents.random_agent import RandomAgent
