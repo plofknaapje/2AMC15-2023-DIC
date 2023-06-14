@@ -30,7 +30,11 @@ def agent_vision(loc: tuple, grid: Grid, vis_range: int) -> np.ndarray:
             vis_sq = center + r * dir
             grid_sq = loc_arr + r * dir
             if one_visible([vis_sq - dir], vision):
-                vision[vis_sq[0], vis_sq[1]] = grid.cells[grid_sq[0], grid_sq[1]]
+                cell = grid.cells[grid_sq[0], grid_sq[1]]
+                if cell in [0, 3, 4]:
+                    vision[vis_sq[0], vis_sq[1]] = 0
+                else:
+                    vision[vis_sq[0], vis_sq[1]] = 2
             else:
                 break
                 
