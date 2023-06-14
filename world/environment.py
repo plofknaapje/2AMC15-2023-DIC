@@ -299,9 +299,9 @@ class Environment:
                 self.info["agent_moved"][agent_id] = True
                 self.world_stats["total_agent_moves"] += 1
             case 1 | 2:  # Moved to a wall or obstacle
-                print(
-                    f"Agent {agent_id} tried to move into a wall at {new_pos} from {self.agent_pos[agent_id]}"
-                )
+                # print(
+                #     f"Agent {agent_id} tried to move into a wall at {new_pos} from {self.agent_pos[agent_id]}"
+                # )
                 self.world_stats["total_failed_moves"] += 1
                 pass
             case 3:  # Moved to a dirt tile
