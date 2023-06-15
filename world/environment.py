@@ -89,9 +89,11 @@ class Environment:
         self.sigma = sigma
         if not grid_fp.exists():
             raise FileNotFoundError(f"Grid {grid_fp} does not exist.")
+
         # Load the grid from the file
         self.grid_fp = grid_fp
-        self.dynamics_fp = dynamics_fp
+
+
         
         # Set up the environment as a blank state.
         self.grid = None
@@ -118,91 +120,99 @@ class Environment:
         self.world_stats = self._reset_world_stats()
         
         self.environment_ready = False
-        self.reset()
+
+        # Set up for dynamics
+        self.dynamics_fp = dynamics_fp
         if self.dynamics_fp is not None:
             with open(self.dynamics_fp) as file:
                 self.dynamic_obs = json.load(file)
-            self.check_dynamics()
-            self.dynamics()
+            self.truck_pos = []
+            self.truck_track = []
+
+        self.reset()
 
     def check_dynamics(self):
         """Check feasibility of the obstacles in the grid if there are any moveable objects.
+
+        Returns an error if something is wrong
 
         First checks whether the objects stay in bound of the grid.
 
         Then it checks if the space in moves in is free from other obstacles/dirt/chargers
 
-         X and Y of the obstacle identify the top left corner
-         The width and height determine the size of the object
-         Down and right determine how far the object can move down and to the right
+        Every truck has an id, trajectory and a width and height
 
          """
-        obstacles = self.dynamic_obs['obstacles']
+
+        self.truck_pos = []
+        trucks = self.dynamic_obs['trucks']
 
         grid = deepcopy(self.grid.cells)
 
-        for obstacle in obstacles:
-            ob_x = obstacle['x']
-            ob_y = obstacle['y']
+        for truck in trucks:
+            width = truck['width']
+            height = truck['height']
+            trajectory = truck['trajectory']
 
-            x_reach = obstacle['right'] + obstacle['width']
-            y_reach = obstacle['down'] + obstacle['height']
+            # Checks if trajectory is free from dirt/obstacles or chargers
+            for pos in trajectory:
+                for i in range(width):
+                    for j in range(height):
+                        if grid[pos[0]+i, pos[1]+j] != 0:
+                            raise ValueError('One or more obstacles collide or interfere with dirt/charger')
 
-            if ob_x+x_reach > len(grid[0]) or ob_y+y_reach > len(grid):
-                raise Exception('Obstacles out of bounds for current grid')
-
-            for i in range(x_reach):
-                for j in range(y_reach):
-                    if grid[ob_x + i, ob_y + j] != 0:
-                        raise Exception('One or more obstacles collide or interfere with dirt/charger')
-                    else:
-                        grid[ob_x + i, ob_y + j] = 2
+            # Initialize truck position and place it on the grid
+            self.truck_pos.append(0)
+            for i in range(2):
+                for j in range(2):
+                    self.grid.cells[trajectory[0][0]+i, trajectory[0][1] + j] = 2
 
     def dynamics(self):
-        """Move the obstacles in the grid if there are any moveable objects.
+        """Move the trucks in the grid if.
 
-        X and Y of the obstacle identify the top left corner
-        The width and height determine the size of the object
-        Down and right determine how far the object can move down and to the right
+        Tries to move the truck to the next position in the trajectory
+        If robot is in the way the truck stays in the same position
+
+        Every truck has an id, trajectory and a width and height
 
         """
 
-        obstacles = self.dynamic_obs['obstacles']
+        trucks = self.dynamic_obs['trucks']
         agent_pos = self.info["agent_pos"]
 
-        if self.grid.cells[agent_pos[0][0], agent_pos[0][1]] == 2:
-            raise Exception('Agent in obstacle')
+        for truck_number, truck in enumerate(trucks):
+            width = truck['width']
+            height = truck['height']
+            trajectory = truck['trajectory']
 
-        for obstacle in obstacles:
-            ob_x = obstacle['x']
-            ob_y = obstacle['y']
-            down = obstacle['down']
-            right = obstacle['right']
+            # Determine the next position in trajectory of the truck
+            position = self.truck_pos[truck_number]
+            next_pos = (position+1) % len(trajectory)
+
+            # Check if robot is in next position in the trajectory
+            possible = True
+            for i in range(width):
+                for j in range(height):
+                    if agent_pos[0] == (trajectory[next_pos][0] + i, trajectory[next_pos][1] + j):
+                        possible = False
+                        print('False')
+
+            # If robot is not in the way --> update truck to new position
+            if possible:
+                # Set the new position of the truck
+                self.truck_pos[truck_number] = next_pos
+
+                # Remove truck from old position
+                for i in range(width):
+                    for j in range(height):
+                        self.grid.cells[trajectory[position][0]+i, trajectory[position][1]+j] = 0
+
+                # Add truck in new position
+                for i in range(width):
+                    for j in range(height):
+                        self.grid.cells[trajectory[next_pos][0]+i, trajectory[next_pos][1]+j] = 2
 
 
-            # determine the new (target) location of the obstacle
-            pos_down = random.randint(0, down)
-            pos_right = random.randint(0, right)
-            obstacle_pos = []
-            for i in range(obstacle['width']):
-                for j in range(obstacle['height']):
-                    obstacle_pos.append((ob_x+pos_right+i, ob_y+pos_down+j))
-
-            # if agent does not block the move
-            if agent_pos[0] not in obstacle_pos:
-                # remove old obstacle
-                for i in range(right + obstacle['width']):
-                    for j in range(down + obstacle['height']):
-                        self.grid.cells[ob_x+i, ob_y+j] = 0
-
-                # place new obstacle
-                for pos in obstacle_pos:
-                    x, y = pos
-                    self.grid.cells[x, y] = 2
-
-        if self.grid.cells[agent_pos[0][0], agent_pos[0][1]] == 2:
-            raise Exception('Agent in obstacle')
-        
     def _reset_info(self) -> dict:
         """Resets the info dictionary.
 
@@ -343,6 +353,8 @@ class Environment:
                 )
                 
         self.grid = Grid.load_grid_file(self.grid_fp)
+        if self.dynamics_fp is not None:
+            self.check_dynamics()
         self._initialize_agent_pos()
         self.info = self._reset_info()
         self.world_stats = self._reset_world_stats()
