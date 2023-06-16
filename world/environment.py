@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from time import sleep, time
 from warnings import warn
-
+from typing import Union
 import numpy as np
 from tqdm import trange
 
@@ -202,7 +202,7 @@ class Environment:
                 agent_pos.append((zeros[0][idx], zeros[1][idx]))
             self.agent_pos = agent_pos
 
-    def get_observation(self) -> [np.ndarray, dict]:
+    def get_observation(self):
         """Gets the current observation and information.
 
         Returns:
@@ -214,7 +214,7 @@ class Environment:
         self.info["agent_pos_arr"] = self.coord_to_array()
         return self.grid.cells, self.info
     
-    def coord_to_array(self) -> [np.ndarray]:
+    def coord_to_array(self):
         # Transform coordinate representation to a 1 on a 0-matrix.
         arrs = []
         for pos in self.info["agent_pos"]:
@@ -223,7 +223,7 @@ class Environment:
             arrs.append(matrix)
         return arrs
 
-    def reset(self, **kwargs) -> [np.ndarray, dict, dict]:
+    def reset(self, **kwargs):
         """Reset the environment to an initial state.
 
         This is to reset the environment. You can fit it keyword arguments
@@ -354,7 +354,7 @@ class Environment:
                     f"{new_pos}."
                 )
 
-    def step(self, actions: list[int]) -> [np.ndarray, float, bool, dict]:
+    def step(self, actions: list[int]):
         """This function makes the agent take a step on the grid.
 
         Actions are provided as a list of integers. The integer values are:
