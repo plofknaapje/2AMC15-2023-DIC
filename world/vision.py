@@ -1,6 +1,6 @@
 import numpy as np
 from world import grid
-from grid import Grid
+from world import Grid
 from pathlib import Path
 
 def agent_vision(loc: tuple, grid: Grid, vis_range: int) -> np.ndarray:
