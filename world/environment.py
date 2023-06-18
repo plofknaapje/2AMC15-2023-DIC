@@ -503,10 +503,10 @@ class Environment:
             A single floating point value representing the reward for a given
             action.
         """
-        dirt_reward = sum(info["dirt_cleaned"]) * 5
+        dirt_reward = sum(info["dirt_cleaned"]) * 10
 
         if info["agent_moved"] == [False] and info["agent_charging"][0] != True:
-            bumped_reward = -1
+            bumped_reward = -3
         else:
             bumped_reward = 0
 
