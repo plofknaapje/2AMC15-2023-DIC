@@ -123,9 +123,8 @@ class Environment:
         ]
         if len(dirt_tiles) >= 30:
             raise ValueError("Environment does not support more than 30 dirt!")
-        
-        self.dirt_dict = {coord: i for i, coord in enumerate(dirt_tiles)}
 
+        self.dirt_dict = {coord: i for i, coord in enumerate(dirt_tiles)}
 
     def _reset_info(self) -> dict:
         """Resets the info dictionary.
@@ -152,7 +151,7 @@ class Environment:
             "agent_charging": self.agent_done,
             "agent_pos": self.agent_pos,
             "agent_pos_arr": [None] * self.n_agents,
-            "dirt_vecs": [np.zeros(30)] * self.n_agents 
+            "dirt_vecs": [np.zeros(30)] * self.n_agents
         }
 
     @staticmethod
@@ -163,9 +162,9 @@ class Environment:
             "total_agent_moves": 0,
             "total_agents_at_charger": 0,
             "total_failed_moves": 0,
-            "steps_per_dirt":0,
-            "failed_moves_fraction":0,
-            "total_reward":0
+            "steps_per_dirt": 0,
+            "failed_moves_fraction": 0,
+            "total_reward": 0
         }
 
     def _initialize_agent_pos(self):
@@ -213,7 +212,7 @@ class Environment:
         # Only update once an agent wants the observations.
         self.info["agent_pos_arr"] = self.coord_to_array()
         return self.grid.cells, self.info
-    
+
     def coord_to_array(self) -> [np.ndarray]:
         # Transform coordinate representation to a 1 on a 0-matrix.
         arrs = []
@@ -485,9 +484,6 @@ class Environment:
         """
         return float(sum(info["dirt_cleaned"]))
 
-
-
-
     @staticmethod
     def _custom_reward_function(grid: Grid, info: dict) -> float:
         """This is the custom reward function.
@@ -539,7 +535,7 @@ class Environment:
         agents: list[BaseAgent],
         max_steps: int,
         out_dir: Path,
-        sigma: float = 0.0,     #test with 2 values
+        sigma: float = 0.0,
         agent_start_pos: list[tuple[int, int]] = None,
         random_seed: int | float | str | bytes | bytearray = 0,
         show_images: bool = False,
@@ -619,10 +615,12 @@ class Environment:
 
         # Get custom evaluation metrics
         if world_stats["total_dirt_cleaned"]:
-            world_stats["steps_per_dirt"] = (world_stats["total_agent_moves"] + world_stats["total_failed_moves"]) / world_stats["total_dirt_cleaned"]
+            world_stats["steps_per_dirt"] = (world_stats["total_agent_moves"] + world_stats["total_failed_moves"]) \
+                / world_stats["total_dirt_cleaned"]
         else:
             world_stats["steps_per_dirt"] = -1
-        world_stats["failed_moves_fraction"] = world_stats["total_failed_moves"] / (world_stats["total_agent_moves"] + world_stats["total_failed_moves"])
+        world_stats["failed_moves_fraction"] = world_stats["total_failed_moves"] \
+            / (world_stats["total_agent_moves"] + world_stats["total_failed_moves"])
 
         # Generate path images
         path_images = visualize_path(initial_grid, agent_paths)

@@ -3,14 +3,20 @@ import itertools as it
 import pandas as pd
 from collections import deque
 
-def shortest_path(grid_fp: str, start: tuple[int], end: tuple[int]) -> tuple[list,int]:
-    """Get the shortest possible path between two coordinates on a specified grid.
 
-    Arguments:
-        :param grid_fp:         Path to the grid file.
-        :param start:         Starting position coordinates.
-        :param end:         Ending position coordinates.
+def shortest_path(grid_fp: str, start: tuple[int], end: tuple[int]) -> tuple[list, int] | None:
     """
+    Get the shortest possible path between two coordinates on a specified grid.
+
+    Args:
+        grid_fp (str): path to the grid file.
+        start (tuple[int]): starting position coordinates.
+        end (tuple[int]): ending position coordinates.
+
+    Returns:
+        tuple[list,int]: length of the shortest path and the complete shortest path.
+    """
+
     # Load the grid
     grid = np.load(grid_fp)
     grid = np.flip(grid, axis=1)
@@ -64,20 +70,23 @@ def shortest_path(grid_fp: str, start: tuple[int], end: tuple[int]) -> tuple[lis
         path.append(start)
         path.reverse()
         return len(path)-1, path
-    
+
     # If no path found return None
     else:
-        return None  
+        return None
 
 
-def optimal_path(grid_fp: str, start_pos: tuple[int]) -> tuple[int,list]:
-    """Get the optimal path and the number of steps for a specific grid, starting position and one agent.
-    
+def optimal_path(grid_fp: str, start_pos: tuple[int]) -> tuple[int, list]:
+    """
+    Get the optimal path and the number of steps for a specific grid, starting position and one agent.
     ATTENTION: ONLY WORKS FOR GRIDS WITH MAX ~8 DIRT TILES!
-    
-    Arguments:
-        :param grid_fp (str): Path to the grid file.
-        :param start_pos (tuple[int]): Starting position coordinates.
+
+    Args:
+        grid_fp (str): path to the grid file.
+        start_pos (tuple[int]): starting position coordinates.
+
+    Returns:
+        tuple[int, list]: length of the optimal path and the optimal path itself.
     """
     # Load the grid
     grid = np.load(grid_fp)
@@ -100,13 +109,13 @@ def optimal_path(grid_fp: str, start_pos: tuple[int]) -> tuple[int,list]:
             tpl = tuple(permutation[i])
             lst.append(tpl)
         permutations.append(lst)
-    
+
     # Create a graph with the distances between any two checkpoints
     checkpoints = [start] + permutations[0] + [end]
     graph = pd.DataFrame(columns=checkpoints, index=checkpoints)
     graph.iloc[:] = 0
 
-    i,j = 0,0
+    i = 0
     for p1 in checkpoints:
         j = 0
         for p2 in checkpoints:
@@ -136,7 +145,7 @@ def optimal_path(grid_fp: str, start_pos: tuple[int]) -> tuple[int,list]:
         if length < optimal_length:
             optimal_path = path
             optimal_length = length
-    
+
     # Create a list with the exact coordinates for every step
     optimal_path_steps = []
     for i in range(len(optimal_path)-1):

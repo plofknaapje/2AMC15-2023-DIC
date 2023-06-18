@@ -14,7 +14,9 @@ import pandas as pd
 try:
     from agents.mc_agent import MCAgent
     from world import Environment
+
     from world.grid import Grid
+
 except ModuleNotFoundError:
     import sys
     from os import pardir, path
@@ -26,15 +28,13 @@ except ModuleNotFoundError:
     if root_path not in sys.path:
         sys.path.extend(root_path)
 
-    from agents.greedy_agent import GreedyAgent
-
     # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.random_agent import RandomAgent
-    from agents.value_agent import ValueAgent
+    from agents.value_agent import MCAgent
     from world import Environment
 
+
 def reward_func(grid: Grid, info: dict) -> float:
+
     reward = 0
     if not info["agent_moved"][0] and not info["agent_charging"][0]:
         reward -= 1
@@ -156,7 +156,6 @@ def train(
 if __name__ == "__main__":
     train(
         grid_paths=[Path("grid_configs/multi_room.grd")],
-                    # Path("grid_configs/multi_room.grd")]
         no_gui=True,
         iters=1000,
         fps=30,

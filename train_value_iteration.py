@@ -5,8 +5,6 @@ from pathlib import Path
 from tqdm import trange
 
 try:
-    from agents.greedy_agent import GreedyAgent
-
     # Add your agents here
     from agents.value_agent import ValueAgent
     from world import Environment
@@ -20,8 +18,6 @@ except ModuleNotFoundError:
 
     if root_path not in sys.path:
         sys.path.extend(root_path)
-
-    from agents.greedy_agent import GreedyAgent
 
     from agents.value_agent import ValueAgent
     from world import Environment

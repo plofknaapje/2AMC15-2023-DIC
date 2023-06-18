@@ -2,18 +2,13 @@
 
 Trains the Q-Learning Agent and reports the results
 """
-from argparse import ArgumentParser
 from pathlib import Path
 
 from tqdm import trange
 
 try:
-    from agents.greedy_agent import GreedyAgent
 
     # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.random_agent import RandomAgent
-    from agents.value_agent import ValueAgent
     from agents.QLearn_agent import QLearnAgent
     from world import Environment
 except ModuleNotFoundError:
@@ -27,12 +22,8 @@ except ModuleNotFoundError:
     if root_path not in sys.path:
         sys.path.extend(root_path)
 
-    from agents.greedy_agent import GreedyAgent
-
     # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.random_agent import RandomAgent
-    from agents.value_agent import ValueAgent
+    from agents.QLearn_agent import QLearnAgent
     from world import Environment
 
 
@@ -67,7 +58,7 @@ def main(
         agents = [
             # QLearnAgent(0, gamma=0.9, epsilon=0.4),       #OLD VERSION
             # QLearnAgent(0, gamma=0.6, epsilon=0.4),       #OLD VERSION
-            QLearnAgent(1, allowed_actions=list(range(4)), gamma=0.9, training=True)
+            QLearnAgent(1, allowed_actions=list(range(4)), gamma=0.9, training=True),
             QLearnAgent(1, allowed_actions=list(range(4)), gamma=0.6, training=True)
         ]
 

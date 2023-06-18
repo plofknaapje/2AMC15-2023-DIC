@@ -19,20 +19,17 @@ def powerset(iterable):
 
 
 class MCAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, obs: np.ndarray, verbose=False):
+    def __init__(self, agent_number: int, gamma: float, obs: np.ndarray):
         """
-        Set agent parameters.
+        Sets agent parameters.
 
         Args:
-            agent_number: The index of the agent in the environment.
-            gamma: loss rate.
-            theta: minimal change.
+            agent_number (int): The index of the agent in the environment.
+            gamma (float): loss rate.
+            obs (np.ndarray): environment observation.
         """
         super().__init__(agent_number)
         self.gamma = gamma
-        self.verbose = verbose
-
-
 
         cols, rows = obs.shape
 
@@ -69,6 +66,14 @@ class MCAgent(BaseAgent):
         self.prev_reward = 0
 
     def process_reward(self, observation: np.ndarray, reward: float):
+        """
+        Process the rewards from the epoch. The discounted reward is calculated for each action.
+        Then, these rewards are added to the rewards of each state-action pair.
+
+        Args:
+            observation (np.ndarray): current observation.
+            reward (float): reward value.
+        """
 
         if sum(self.rewards) > 0:
             discounted_rewards = []
@@ -87,12 +92,13 @@ class MCAgent(BaseAgent):
 
             for state in episode_states:
                 self.pi[state] = self.best_action(state)
-        # else:
-        #     print("0 reward :-(")
 
         self.reset_agent_state()
 
     def reset_agent_state(self):
+        """
+        Reset the internal record keeping of the agent for a new epoch.
+        """
         self.episode = []
         self.rewards = []
         self.prev_reward = 0
@@ -124,8 +130,16 @@ class MCAgent(BaseAgent):
 
         return action
 
-    def random_action(self, state):
+    def random_action(self, state: tuple) -> int:
+        """
+        Generate a random action.
 
+        Args:
+            state (tuple): current state.
+
+        Returns:
+            tuple: proposed action.
+        """
         options = []
 
         for action in [0, 1, 2, 3]:
@@ -135,7 +149,17 @@ class MCAgent(BaseAgent):
 
         return choice(options)
 
-    def action_result(self, state, action):
+    def action_result(self, state: tuple, action: int) -> tuple:
+        """
+        Calculate the result of an action.
+
+        Args:
+            state (tuple): current state.
+            action (int): proposed action.
+
+        Returns:
+            tuple: resulting space.
+        """
         x, y = state[0]
         match action:
             case 0:  # Down
@@ -150,7 +174,16 @@ class MCAgent(BaseAgent):
                 new_space = state
         return new_space
 
-    def best_action(self, state):
+    def best_action(self, state: tuple) -> int:
+        """
+        Best action for current state based on the q-table.
+
+        Args:
+            state (tuple): current state.
+
+        Returns:
+            int: best action from current state.
+        """
         reward = 0
         action = -1
         for new_action in [0, 1, 2, 3]:
@@ -163,6 +196,13 @@ class MCAgent(BaseAgent):
         return action
 
     def add_reward(self, observation, info):
+        """
+        Add a reward to the internal tables.
+
+        Args:
+            observation (np.ndarray): observation of the environment.
+            info (dict): information dictionary.
+        """
         new_pos = info["agent_pos"][self.agent_number]
         reward = 0
         # Agent is finished
@@ -175,7 +215,10 @@ class MCAgent(BaseAgent):
 
         self.rewards.append(reward)
 
-    def state_coverage(self):
+    def state_coverage(self) -> float:
+        """
+        Determines how many states have a valid action in their pi-table.
+        """
         total_states = len(self.states)
         total_actions = sum(self.pi[state] != -1 for state in self.states)
         return total_actions / total_states

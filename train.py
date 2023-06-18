@@ -12,11 +12,7 @@ from pathlib import Path
 from tqdm import trange
 
 try:
-    from agents.greedy_agent import GreedyAgent
-
     # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.random_agent import RandomAgent
     from agents.value_agent import ValueAgent
     from world import Environment
 except ModuleNotFoundError:
@@ -30,11 +26,7 @@ except ModuleNotFoundError:
     if root_path not in sys.path:
         sys.path.extend(root_path)
 
-    from agents.greedy_agent import GreedyAgent
-
     # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.random_agent import RandomAgent
     from agents.value_agent import ValueAgent
     from world import Environment
 
@@ -89,10 +81,7 @@ def main(
         # Set up the agents from scratch for every grid
         # Add your agents here
         agents = [
-            # NullAgent(0),
-            # GreedyAgent(0),
-            # RandomAgent(0),
-            # ValueAgent(0, gamma=0.9)
+            ValueAgent(0, gamma=0.9)
         ]
 
         # Iterate through each agent for `iters` iterations

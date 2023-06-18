@@ -23,10 +23,10 @@ class ValueAgent(BaseAgent):
         Set agent parameters.
 
         Args:
-            agent_number (int): The index of the agent in the environment.
-            gamma (float): Discount factor.
-            verbose (bool): Verbose output. Defaults to False.
-            theta (float): Minimal change per iteration. Defaults to 0.1.
+            agent_number (int): the index of the agent in the environment.
+            gamma (float): discount factor.
+            verbose (bool): verbose output. Defaults to False.
+            theta (float): minimal change per iteration. Defaults to 0.1.
         """
         super().__init__(agent_number)
         self.gamma = gamma
@@ -39,8 +39,8 @@ class ValueAgent(BaseAgent):
         Placeholder function.
 
         Args:
-            observation (np.ndarray): Current environment grid.
-            reward (float): Reward.
+            observation (np.ndarray): current environment grid.
+            reward (float): reward.
         """
         pass
 
@@ -49,8 +49,8 @@ class ValueAgent(BaseAgent):
         Default method which decides an action based on the environment.
 
         Args:
-            observation (np.ndarray): Current environment grid.
-            info (None | dict): Situation in current environment.
+            observation (np.ndarray): current environment grid.
+            info (None | dict): situation in current environment.
 
         Returns:
             int: action to be taken.
@@ -79,7 +79,7 @@ class ValueAgent(BaseAgent):
         of the observation grid.
 
         Args:
-            observation (np.ndarray): Current environment grid.
+            observation (np.ndarray): current environment grid.
 
         Raises:
             ValueError:
@@ -178,11 +178,11 @@ class ValueAgent(BaseAgent):
         Determines the result of a certain action when taken in a certain place.
 
         Args:
-            state (tuple[tuple, tuple]): Current state of the agent.
-            action (int): Action to be taken.
+            state (tuple[tuple, tuple]): current state of the agent.
+            action (int): action to be taken.
 
         Returns:
-            tuple[tuple, tuple]: Resulting state. (-1, -1) if the action is illegal.
+            tuple[tuple, tuple]: resulting state. (-1, -1) if the action is illegal.
         """
         # Col - row
         space, dirt_left = state
@@ -215,10 +215,10 @@ class ValueAgent(BaseAgent):
         Generates the best move for a state.
 
         Args:
-            state (tuple[tuple, tuple]): Current state
+            state (tuple[tuple, tuple]): current state
 
         Returns:
-            int: Action to be taken.
+            int: action to be taken.
         """
         return self.max_action(state)[1]
 

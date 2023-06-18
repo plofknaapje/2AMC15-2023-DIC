@@ -2,7 +2,6 @@
 
 This is an agent that takes a random action from the available action space.
 """
-import random
 from random import randint
 import numpy as np
 import math
@@ -23,7 +22,7 @@ class QLearnAgent(BaseAgent):
         """
         super().__init__(agent_number)
         self.gamma = gamma
-        
+
         self.epsilon = epsilon
         self.alpha = alpha
         self.Q = None
@@ -114,7 +113,7 @@ class QLearnAgent(BaseAgent):
         #check if already dirt free
         if self.dirtGrid[quarter] == 1:
             return self.dirt_byte_converter(self.dirtGrid)
-        
+
         dirty = False
 
 
@@ -128,7 +127,7 @@ class QLearnAgent(BaseAgent):
                 if dirty:
                     break
 
-        
+
         if quarter == 2:
             for i in range(0, math.floor(height/2)):
                 for j in range(math.ceil(width/2), width):
@@ -146,7 +145,7 @@ class QLearnAgent(BaseAgent):
                         break
                 if dirty:
                     break
-                
+
         if quarter == 4:
             for i in range(math.ceil(height/2), height):
                 for j in range(math.ceil(width/2), width):
@@ -155,14 +154,14 @@ class QLearnAgent(BaseAgent):
                         break
                 if dirty:
                     break
-        
+
         if dirty == False:
             self.dirtGrid[quarter] = 1
         return self.dirt_byte_converter(self.dirtGrid)
 
         #check if there is dirt
-        #update dirt 
-        
+        #update dirt
+
     def dirt_byte_converter(self, dirt_grid):
         number = 0
         if dirt_grid[0] == 1:

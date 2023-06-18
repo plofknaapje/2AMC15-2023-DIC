@@ -15,9 +15,7 @@ try:
     from world import Environment
 
     # Add your agents here
-    from agents.null_agent import NullAgent
-    from agents.greedy_agent import GreedyAgent
-    from agents.random_agent import RandomAgent
+
 except ModuleNotFoundError:
     from os import path
     from os import pardir
@@ -34,8 +32,6 @@ except ModuleNotFoundError:
 
     # Add your agents here
     from agents.null_agent import NullAgent
-    from agents.greedy_agent import GreedyAgent
-    from agents.random_agent import RandomAgent
 
 from optimal_path import optimal_path
 
@@ -67,15 +63,17 @@ def main(grid_paths: list[Path], no_gui: bool, iters: int, fps: int,
     """Main loop of the program."""
 
     for grid in grid_paths:
-        
+
         # Print start position, optimal number of steps and optimal path
-        start_pos = (1,2)                               # Or: info['agent_pos'][0].
-        print('START POSITION:', start_pos)             # ^ In that case place this code block after environment intialization.
-        optimal = optimal_path(grid, start_pos)         
+        start_pos = (1, 2)                               # Or: info['agent_pos'][0].
+        # ^ In that case place this code block after environment intialization.
+        print('START POSITION:', start_pos)
+        optimal = optimal_path(grid, start_pos)
         print('OPTIMAL NUMBER OF STEPS:', optimal[0])
         print('OPTIMAL PATH:', optimal[1])
-        start_pos = (start_pos[1], start_pos[0])        # Invert the start position coordinates so that it matches what we see in the GUI.
-                                                        # This way it is consistent with the other functions below.
+        # Invert the start position coordinates so that it matches what we see in the GUI.
+        # This way it is consistent with the other functions below.
+        start_pos = (start_pos[1], start_pos[0])
 
         # Set up the environment and reset it to its initial state
         env = Environment(grid, no_gui, n_agents=1, agent_start_pos=[start_pos],
@@ -83,7 +81,7 @@ def main(grid_paths: list[Path], no_gui: bool, iters: int, fps: int,
                           reward_fn='custom')
         obs, info = env.get_observation()
 
-        agents = [GreedyAgent(0)]
+        agents = [NullAgent(0)]
 
         # Iterate through each agent for `iters` iterations
         for agent in agents:
