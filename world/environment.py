@@ -448,6 +448,8 @@ class Environment:
         # Update the grid with the new agent positions and calculate the reward
         reward = self.reward_fn(self.grid, self.info)
 
+        self.info["agent_pos_arr"] = self.coord_to_array()
+
         # Get total reward
         self.world_stats["total_reward"] += reward
 

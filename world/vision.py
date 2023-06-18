@@ -113,16 +113,16 @@ def coord_in_grid(coord: np.ndarray, grid: Grid) -> bool:
 if __name__ == "__main__":
 
     grd = Grid.load_grid_file(Path("grid_configs/simple_grid.grd"))
-    print(grd.cells)
+    # print(grd.cells)
 
-    location = (1, 1)
-    print(agent_vision(location, grd, 1))
-    print(agent_vision(location, grd, 2))
-    print(agent_vision(location, grd, 3))
-    print(agent_vision(location, grd, 4))
+    # location = (1, 1)
+    # print(agent_vision(location, grd, 1))
+    # print(agent_vision(location, grd, 2))
+    # print(agent_vision(location, grd, 3))
+    # print(agent_vision(location, grd, 4))
 
-    print(agent_vision((1,7), grd, 3))
-    print(agent_vision((1,7), grd, 5))
+    # print(agent_vision((1,7), grd, 3))
+    # print(agent_vision((1,7), grd, 5))
 
-    print(agent_vision((4,4), grd, 5))
+    # print(agent_vision((4,4), grd, 5))
 
