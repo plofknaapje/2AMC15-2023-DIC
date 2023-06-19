@@ -123,7 +123,7 @@ class Environment:
         ]
         if len(dirt_tiles) >= 30:
             raise ValueError("Environment does not support more than 30 dirt!")
-        
+
         self.dirt_dict = {coord: i for i, coord in enumerate(dirt_tiles)}
 
 
@@ -152,7 +152,7 @@ class Environment:
             "agent_charging": self.agent_done,
             "agent_pos": self.agent_pos,
             "agent_pos_arr": [None] * self.n_agents,
-            "dirt_vecs": [np.zeros(30)] * self.n_agents 
+            "dirt_vecs": [np.zeros(30)] * self.n_agents
         }
 
     @staticmethod
@@ -213,7 +213,7 @@ class Environment:
         # Only update once an agent wants the observations.
         self.info["agent_pos_arr"] = self.coord_to_array()
         return self.grid.cells, self.info
-    
+
     def coord_to_array(self):
         # Transform coordinate representation to a 1 on a 0-matrix.
         arrs = []
@@ -405,7 +405,9 @@ class Environment:
                 f"but the number of agents is {self.n_agents}."
             )
 
+        dirt_vecs = self.info["dirt_vecs"]
         self.info = self._reset_info()
+        self.info["dirt_vecs"] = dirt_vecs
 
         max_x = self.grid.n_cols - 1
         max_y = self.grid.n_rows - 1
