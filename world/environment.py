@@ -129,6 +129,8 @@ class Environment:
             self.truck_pos = []
             self.truck_track = []
 
+            self.persons_pos = []
+
         self.reset()
 
     def check_dynamics(self):
@@ -144,6 +146,7 @@ class Environment:
 
          """
 
+        # Check trucks dynamics
         self.truck_pos = []
         trucks = self.dynamic_obs['trucks']
 
@@ -167,6 +170,17 @@ class Environment:
                 for j in range(2):
                     self.grid.cells[trajectory[0][0]+i, trajectory[0][1] + j] = 2
 
+        # Check person dynamics
+        self.persons_pos = []
+        persons = self.dynamic_obs['persons']
+        for person in persons:
+            start_pos = person['position']
+            if self.grid.cells[start_pos[0], start_pos[1]] != 0:
+                raise ValueError('Person interferes with obstacle/dirt/charger')
+            else:
+                self.grid.cells[start_pos[0], start_pos[1]] = 2
+                self.persons_pos.append(start_pos)
+
     def dynamics(self):
         """Move the trucks in the grid if.
 
@@ -177,6 +191,21 @@ class Environment:
 
         """
 
+        # update person position
+        for p, person in enumerate(self.persons_pos):
+            arr = [0, 1, 2, 3]
+            n = len(arr)
+            for i in range(n - 1, 0, -1):
+                j = random.randint(0, i)
+                arr[i], arr[j] = arr[j], arr[i]
+
+            change = True
+            for i in arr:
+                if change:
+                    change = self.move_person(i, p, person)
+
+
+        # update forklift truck position
         trucks = self.dynamic_obs['trucks']
         agent_pos = self.info["agent_pos"]
 
@@ -195,7 +224,10 @@ class Environment:
                 for j in range(height):
                     if agent_pos[0] == (trajectory[next_pos][0] + i, trajectory[next_pos][1] + j):
                         possible = False
-                        print('False')
+                    for person in self.persons_pos:
+                        if [trajectory[next_pos][0] + i, trajectory[next_pos][1] + j] == person:
+                            print('person block')
+                            possible = False
 
             # If robot is not in the way --> update truck to new position
             if possible:
@@ -211,6 +243,33 @@ class Environment:
                 for i in range(width):
                     for j in range(height):
                         self.grid.cells[trajectory[next_pos][0]+i, trajectory[next_pos][1]+j] = 2
+
+
+    def move_person(self, i, p, person):
+        if i == 0 and self.grid.cells[person[0], person[1] + 1] == 0:
+            self.grid.cells[person[0], person[1] + 1] = 2
+            self.grid.cells[person[0], person[1]] = 0
+            self.persons_pos[p] = [person[0], person[1] + 1]
+            return False
+
+        if i == 1 and self.grid.cells[person[0], person[1] - 1] == 0:
+            self.grid.cells[person[0], person[1] - 1] = 2
+            self.grid.cells[person[0], person[1]] = 0
+            self.persons_pos[p] = [person[0], person[1] - 1]
+            return False
+
+        if i == 2 and self.grid.cells[person[0]+1, person[1]] == 0:
+            self.grid.cells[person[0]+1, person[1]] = 2
+            self.grid.cells[person[0], person[1]] = 0
+            self.persons_pos[p] = [person[0]+1, person[1]]
+            return False
+        if i == 3 and self.grid.cells[person[0]-1, person[1]] == 0:
+            self.grid.cells[person[0]-1, person[1]] = 2
+            self.grid.cells[person[0], person[1]] = 0
+            self.persons_pos[p] = [person[0]-1, person[1]]
+            return False
+        return True
+
 
 
     def _reset_info(self) -> dict:
