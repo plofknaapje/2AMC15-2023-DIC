@@ -404,7 +404,9 @@ class Environment:
                 f"but the number of agents is {self.n_agents}."
             )
 
+        dirt_vecs = self.info["dirt_vecs"]
         self.info = self._reset_info()
+        self.info["dirt_vecs"] = dirt_vecs
 
         max_x = self.grid.n_cols - 1
         max_y = self.grid.n_rows - 1
