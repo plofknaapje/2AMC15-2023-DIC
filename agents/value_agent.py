@@ -11,11 +11,12 @@ from itertools import chain, combinations
 from time import time
 
 
-def powerset(iterable):
+def powerset(iterable) -> list:
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)  # allows duplicate elements
     return [set for set in
             chain.from_iterable(combinations(s, r) for r in range(len(s)+1))]
+
 
 class ValueAgent(BaseAgent):
     def __init__(self, agent_number: int, gamma: float, verbose=False, theta=0.1):
@@ -137,13 +138,13 @@ class ValueAgent(BaseAgent):
                 print(f"Iter {i} with delta {delta:.2f}")
                 i += 1
 
-    def max_action(self, state: tuple[tuple, tuple]) -> tuple[float, int]:
+    def max_action(self, state: tuple) -> tuple[float, int]:
         """
         Try all actions from the current state and determine the action with
         the highest expected value.
 
         Args:
-            state (tuple[tuple, tuple]): current state of the agent.
+            state (tuple): current state of the agent.
 
         Returns:
             tuple[float, int]: value, action pair with the highest value.
@@ -173,16 +174,16 @@ class ValueAgent(BaseAgent):
 
         return max(value_action)
 
-    def action_outcome(self, state: tuple[tuple, tuple], action: int) -> tuple[tuple, tuple]:
+    def action_outcome(self, state: tuple, action: int) -> tuple:
         """
         Determines the result of a certain action when taken in a certain place.
 
         Args:
-            state (tuple[tuple, tuple]): current state of the agent.
+            state (tuple): current state of the agent.
             action (int): action to be taken.
 
         Returns:
-            tuple[tuple, tuple]: resulting state. (-1, -1) if the action is illegal.
+            tuple[tuple, tuple]: resulting state. ((-1, -1), ()) if the action is illegal.
         """
         # Col - row
         space, dirt_left = state

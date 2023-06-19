@@ -77,8 +77,8 @@ def train(
         # Set up the agents from scratch for every grid
         # Add your agents here
         agents = [
-            MCAgent(0, gamma=0.9, obs=obs),
-            MCAgent(0, gamma=0.6, obs=obs)
+            MCAgent(0, gamma=0.9),
+            MCAgent(0, gamma=0.6)
         ]
 
         # Iterate through each agent for `iters` iterations
@@ -122,6 +122,7 @@ def train(
             # Only go here AFTER training
             print("")
             print(str(agent))
+            agent.evaluation_mode()
             # Add starting spaces here
             if room_name == "simple_grid.grd":
                 starts = [(1, 1), (8, 1), (1, 8), (8, 8)]

@@ -11,7 +11,7 @@ from itertools import chain, combinations
 from random import choice
 
 
-def powerset(iterable):
+def powerset(iterable) -> list:
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)  # allows duplicate elements
     return [set for set in
@@ -19,28 +19,40 @@ def powerset(iterable):
 
 
 class MCAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, obs: np.ndarray):
+    def __init__(self, agent_number: int, gamma: float):
         """
         Sets agent parameters.
 
         Args:
             agent_number (int): The index of the agent in the environment.
             gamma (float): loss rate.
-            obs (np.ndarray): environment observation.
         """
         super().__init__(agent_number)
         self.gamma = gamma
+        self.ready = False
+        self.training = True
 
-        cols, rows = obs.shape
+        # Agent state
+        self.episode = []
+        self.rewards = []
 
+    def setup_states(self, observation: np.ndarray):
+        """
+        Generate the value and q-tables and state space.
+
+        Args:
+            observation (np.ndarray): current observation.
+        """
+        # State space
+        cols, rows = observation.shape
         self.spaces = [
             (i, j) for i in range(cols) for j in range(rows)
-            if obs[i, j] in (0, 3, 4)
+            if observation[i, j] in (0, 3, 4)
         ]
 
         self.dirt_spaces = [
             space for space in self.spaces
-            if obs[space] == 3
+            if observation[space] == 3
         ]
 
         dirt_configs = powerset(self.dirt_spaces)
@@ -51,6 +63,7 @@ class MCAgent(BaseAgent):
             for dirt in dirt_configs
         ]
 
+        # Agent tables
         self.returns = {(state, action): [] for state in self.states
                         for action in [0, 1, 2, 3]}
 
@@ -59,9 +72,6 @@ class MCAgent(BaseAgent):
 
         self.pi = {state: -1 for state in self.states}
 
-        # Agent state
-        self.episode = []
-        self.rewards = []
         self.dirt_left = self.dirt_spaces.copy()
         self.prev_reward = 0
 
@@ -74,7 +84,6 @@ class MCAgent(BaseAgent):
             observation (np.ndarray): current observation.
             reward (float): reward value.
         """
-
         if sum(self.rewards) > 0:
             discounted_rewards = []
             for reward in reversed(self.rewards):
@@ -115,19 +124,24 @@ class MCAgent(BaseAgent):
         Returns:
             int: action to be taken.
         """
+        if not self.ready:
+            self.setup_states(observation)
+            self.ready = True
+
         agent_space = info["agent_pos"][self.agent_number]
+        # The agent keeps track of where it has cleaned dirt
         self.dirt_left = [space for space in self.spaces if observation[space] == 3]
 
-        self.old_pos = agent_space
-
         state = (agent_space, tuple(self.dirt_left))
-
         action = self.pi[state]
-        if action == -1:
+        if action == -1:  # No useful action discovered yet
             action = self.random_action(state)
+        elif self.training:
+            # Explore 25% of the time
+            if choice([1, 2, 3, 4]) == 1:
+                action = self.random_action(state)
 
         self.episode.append((state, action))
-
         return action
 
     def random_action(self, state: tuple) -> int:
@@ -222,6 +236,12 @@ class MCAgent(BaseAgent):
         total_states = len(self.states)
         total_actions = sum(self.pi[state] != -1 for state in self.states)
         return total_actions / total_states
+
+    def evaluation_mode(self):
+        self.training = False
+
+    def training_mode(self):
+        self.training = True
 
     def __str__(self):
         return f"MCAgent({self.agent_number}, {self.gamma})"
