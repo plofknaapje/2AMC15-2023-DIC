@@ -21,7 +21,7 @@ def powerset(iterable) -> list:
 class MCAgent(BaseAgent):
     def __init__(self, agent_number: int, gamma: float):
         """
-        Sets agent parameters.
+        MCAgent. Sets agent parameters.
 
         Args:
             agent_number (int): The index of the agent in the environment.

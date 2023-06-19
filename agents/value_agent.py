@@ -21,7 +21,7 @@ def powerset(iterable) -> list:
 class ValueAgent(BaseAgent):
     def __init__(self, agent_number: int, gamma: float, verbose=False, theta=0.1):
         """
-        Set agent parameters.
+        ValueAgent. Set agent parameters.
 
         Args:
             agent_number (int): the index of the agent in the environment.

@@ -11,14 +11,13 @@ from agents import BaseAgent
 class QLearnAgent(BaseAgent):
     def __init__(self, agent_number: int, gamma: float, epsilon=0.4, alpha=0.08):
         """
-        Set agent parameters.
+        QLearnAgent. Set agent parameters.
 
         Args:
-            agent_number: The index of the agent in the environment.
-            gamma: loss rate.
-            theta: minimal change.
-            epsilon: epsilon greedy
-            alpha: learning rate
+            agent_number (int): The index of the agent in the environment.
+            gamma (float): loss rate.
+            epsilon (float): epsilon greedy. Defaults to 0.4.
+            alpha (float): learning rate. Defaults to 0.08.
         """
         super().__init__(agent_number)
         self.gamma = gamma
@@ -35,14 +34,29 @@ class QLearnAgent(BaseAgent):
         self.new_state = [0, 0, 0]
 
     def process_reward(self, action: int, reward: float):
+        """
+        Process the reward after an episode has finished.
+
+        Args:
+            action (int): value of the action taken.
+            reward (float): reward of the action.
+        """        
         # update the Q function
         self.Q[self.state[0], self.state[1], self.state[2], action] += \
             self.alpha_decay * (reward + self.gamma * np.max(self.Q[self.new_state[0], self.new_state[1], self.new_state[2], :]) -
                            self.Q[self.state[0], self.state[1], self.state[2], action])
-        return 0
 
-    def take_action(self, observation: np.ndarray, info: None | dict):
+    def take_action(self, observation: np.ndarray, info: None | dict) -> int:
+        """
+        Take an action based on the current state.
 
+        Args:
+            observation (np.ndarray): environment observation.
+            info (None | dict): information dict.
+
+        Returns:
+            int: action to be taken
+        """        
         if self.Q is None:
             print('Initializing Q')
             self.Q = np.zeros([observation.shape[0], observation.shape[1], 2 ** 4, 4])
@@ -79,7 +93,18 @@ class QLearnAgent(BaseAgent):
 
         return action
 
-    def get_new_state(self, observation, action, state):
+    def get_new_state(self, observation: np.ndarray, action: int, state: list) -> list:
+        """
+        Determine the expected new state based on an action and the current state.
+
+        Args:
+            observation (np.ndarray): environment observation.
+            action (int): action to be taken.
+            state (list): current state.
+
+        Returns:
+            list: expected state
+        """        
         action_map = {0: [state[0], state[1] + 1, state[2]],  # down
                       1: [state[0], state[1] - 1, state[2]],  # up
                       2: [state[0] - 1, state[1], state[2]],  # left
@@ -95,7 +120,18 @@ class QLearnAgent(BaseAgent):
             return new_state
 
 
-    def dirt_function(self, observation: np.ndarray, state):
+    def dirt_function(self, observation: np.ndarray, state: list) -> int:
+        """
+        Calculate the dirt left.
+
+        Args:
+            observation (np.ndarray): environment observation.
+            state (list): state.
+
+        Returns:
+            int: dirt in byte representation.
+        """        
+
         #check which quarter
         height = observation.shape[0]
         width = observation.shape[1]
@@ -116,8 +152,6 @@ class QLearnAgent(BaseAgent):
 
         dirty = False
 
-
-
         if quarter == 1:
             for i in range(0, math.floor(height/2)):
                 for j in range(0, math.floor(width/2)):
@@ -126,7 +160,6 @@ class QLearnAgent(BaseAgent):
                         break
                 if dirty:
                     break
-
 
         if quarter == 2:
             for i in range(0, math.floor(height/2)):
@@ -159,10 +192,7 @@ class QLearnAgent(BaseAgent):
             self.dirtGrid[quarter] = 1
         return self.dirt_byte_converter(self.dirtGrid)
 
-        #check if there is dirt
-        #update dirt
-
-    def dirt_byte_converter(self, dirt_grid):
+    def dirt_byte_converter(self, dirt_grid: np.ndarray) -> int:
         number = 0
         if dirt_grid[0] == 1:
             number += 1
