@@ -18,13 +18,17 @@ class DQN(nn.Module):
     def __init__(self, num_inputs, num_actions):
         super(DQN, self).__init__()
         self.fc1 = nn.Linear(num_inputs, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, num_actions)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, 128)
+        self.fc4 = nn.Linear(128, 32)
+        self.fc5 = nn.Linear(32, num_actions)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = self.fc5(x)
         return x
 
 
@@ -42,8 +46,9 @@ class DQNAgent(BaseAgent):
         """
         super().__init__(agent_number)
         self.gamma = gamma
+        self.epsilon_start = epsilon
         self.epsilon = epsilon
-        self.epsilon_decay_steps = 1000000000
+
         self.epsilon_min = 0.02
         self.alpha = alpha
         self.num_actions = 4
@@ -128,8 +133,7 @@ class DQNAgent(BaseAgent):
     def take_action(self, pos: np.ndarray, info: None | dict):
 
         self.train()
-
-        self.epsilon = max(self.epsilon * (1 - (self.step / self.epsilon_decay_steps)), self.epsilon_min)
+        self.epsilon = max(self.epsilon_start * (1 - info['iteration']), self.epsilon_min)
 
         self.state = torch.tensor(pos.flatten(), dtype=torch.float32).unsqueeze(0).to(self.device)
 

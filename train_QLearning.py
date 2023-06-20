@@ -66,14 +66,15 @@ def main(
         )
         obs, info = env.get_observation()
 
+        # Iterate through each agent for `iters` iterations
+        TOTAL_ITERATIONS = 200
+
         # Set up the agents from scratch for every grid
         # Add your agents here
         agents = [
             DQNAgent(0, 0.99, len(env.coord_to_array()[0])*len(env.coord_to_array()[0][0]), epsilon=0.99)
         ]
 
-        # Iterate through each agent for `iters` iterations
-        TOTAL_ITERATIONS = 200
 
         for agent in agents:
             for i in range(TOTAL_ITERATIONS):
@@ -103,7 +104,7 @@ def main(
                 print(world_stats)
 
             info['iteration'] = 0
-            Environment.evaluate_agent(grid, dynamics_fp, [agent], 1000, out_runs, 0.1, agent_start_pos=[(1, 1)])
+            Environment.evaluate_agent(grid, dynamics_fp, [agent], 1000, out_runs, 0.1, agent_start_pos=[(2, 2)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(1, 8)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(8, 1)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(8, 8)])
@@ -116,7 +117,7 @@ def main(
 
 if __name__ == "__main__":
     main(
-        grid_paths=[Path("grid_configs/easytest.grd")],
+        grid_paths=[Path("grid_configs/warehouse_stat_3.grd")],
         dynamics_fp=Path("dynamic_env_config/test2.json"),
         no_gui=False,
         iters=1000,
