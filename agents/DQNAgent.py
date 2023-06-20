@@ -48,7 +48,7 @@ class DQNAgent(BaseAgent):
         self.alpha = alpha
         self.num_actions = 4
 
-        self.grid_size = grid_size
+        self.grid_size = grid_size + 30
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.Q_network = DQN(self.grid_size, self.num_actions).to(self.device)

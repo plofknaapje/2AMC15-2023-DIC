@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from tqdm import trange
+import numpy as np
 
 try:
     from agents.greedy_agent import GreedyAgent
@@ -80,12 +81,20 @@ def main(
                 for _ in trange(iters):
                     # Agent takes an action based on the latest observation and info
                     info['iteration'] = i/TOTAL_ITERATIONS
-                    action = agent.take_action(env.coord_to_array()[0], info)
+                    # print(env.coord_to_array()[0].flatten())
+                    # print(info['dirt_vecs'])
+
+                    input_nn = np.concatenate((np.array(env.coord_to_array()[0].flatten()), np.array(info['dirt_vecs'][0])))
+
+                    action = agent.take_action(input_nn, info)
 
                     # The action is performed in the environment
                     obs, reward, terminated, info = env.step([action])
 
-                    agent.process_reward(env.coord_to_array()[0], reward, action, terminated)
+                    input_nn = np.concatenate(
+                        (np.array(env.coord_to_array()[0].flatten()), np.array(info['dirt_vecs'][0])))
+
+                    agent.process_reward(input_nn, reward, action, terminated)
 
                     # If the agent is terminated, we reset the env.
                     if terminated:
