@@ -455,9 +455,9 @@ class Environment:
                 self.info["agent_moved"][agent_id] = True
                 self.world_stats["total_agent_moves"] += 1
             case 1 | 2:  # Moved to a wall or obstacle
-                print(
-                    f"Agent {agent_id} tried to move into a wall at {new_pos} from {self.agent_pos[agent_id]}"
-                )
+                # print(
+                #     f"Agent {agent_id} tried to move into a wall at {new_pos} from {self.agent_pos[agent_id]}"
+                # )
                 self.world_stats["total_failed_moves"] += 1
                 pass
             case 3:  # Moved to a dirt tile
@@ -477,7 +477,7 @@ class Environment:
                     self.world_stats["total_agents_at_charger"] += 1
                 # Otherwise, the agent can't move and nothing happens
                 else:
-                    print("Room is not clean yet so charging is not allowed.")
+                    #print("Room is not clean yet so charging is not allowed.")
                     self.world_stats["total_failed_moves"] += 1
             case _:
                 raise ValueError(
@@ -586,6 +586,11 @@ class Environment:
         terminal_state = sum(self.agent_done) == self.n_agents
         if terminal_state:
             self.environment_ready = False
+
+        if terminal_state:
+            terminal_state = 1
+        else:
+            terminal_state = 0
             
         if not self.no_gui:
             time_to_wait = self.target_spf - (time() - start_time)
@@ -637,10 +642,10 @@ class Environment:
             A single floating point value representing the reward for a given
             action.
         """
-        dirt_reward = sum(info["dirt_cleaned"]) * 5
+        dirt_reward = sum(info["dirt_cleaned"]) * 50
         
         if info["agent_moved"] == [False] and info["agent_charging"][0] != True:
-            bumped_reward = -1
+            bumped_reward = -10
         else:
             bumped_reward = 0
             
@@ -650,7 +655,7 @@ class Environment:
             moving_reward = 0
             
         if grid.sum_dirt() == 0 and info["agent_charging"][0]:
-            charging_reward = 10
+            charging_reward = 100
         elif info["agent_charging"][0]:
             charging_reward = -1
         else:
@@ -672,6 +677,7 @@ class Environment:
     @staticmethod
     def evaluate_agent(
         grid_fp: Path,
+        dynamics_fp: Path,
         agents: list[BaseAgent],
         max_steps: int,
         out_dir: Path,
@@ -697,6 +703,7 @@ class Environment:
 
         Args:
             grid_fp: Path to the grid file to use.
+            dynamics_fp: Path to the dynamics file to use.
             agents: A list of trained agents to evaluate.
             max_steps: Max number of steps to take for each agent.
             out_dir: Where to save the results.
@@ -718,6 +725,7 @@ class Environment:
             out_dir.mkdir(parents=True, exist_ok=True)
         env = Environment(
             grid_fp=grid_fp,
+            dynamics_fp=dynamics_fp,
             no_gui=True,
             n_agents=len(agents),
             sigma=sigma,
@@ -737,7 +745,7 @@ class Environment:
             max_steps, desc=f"Evaluating agent" f"{'s' if len(agents) > 1 else ''}"
         ):
             # Get the agent actions
-            actions = [agent.take_action(obs, info) for agent in agents]
+            actions = [agent.take_action_eval(info['agent_pos'], info) for agent in agents]
             # Take a step in the environment
             obs, _, terminated, info = env.step(actions)
         
