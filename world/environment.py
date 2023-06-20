@@ -603,6 +603,15 @@ class Environment:
             self.dynamics()
             
         return self.grid.cells, reward, terminal_state, self.info
+
+    def coord_to_array(self) -> [np.ndarray]:
+        # Transform coordinate representation to a 1 on a 0-matrix.
+        arrs = []
+        for pos in self.info["agent_pos"]:
+            matrix = np.zeros_like(self.grid.cells)
+            matrix[pos] = 1
+            arrs.append(matrix)
+        return arrs
     
     @staticmethod
     def _default_reward_function(grid: Grid, info: dict) -> float:
@@ -745,7 +754,7 @@ class Environment:
             max_steps, desc=f"Evaluating agent" f"{'s' if len(agents) > 1 else ''}"
         ):
             # Get the agent actions
-            actions = [agent.take_action_eval(info['agent_pos'], info) for agent in agents]
+            actions = [agent.take_action_eval(env.coord_to_array()[0], info) for agent in agents]
             # Take a step in the environment
             obs, _, terminated, info = env.step(actions)
         

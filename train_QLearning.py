@@ -68,7 +68,7 @@ def main(
         # Set up the agents from scratch for every grid
         # Add your agents here
         agents = [
-            DQNAgent(0, gamma=0.99, epsilon=0.99)
+            DQNAgent(0, 0.99, len(env.coord_to_array()[0])*len(env.coord_to_array()[0][0]), epsilon=0.99)
         ]
 
         # Iterate through each agent for `iters` iterations
@@ -80,12 +80,12 @@ def main(
                 for _ in trange(iters):
                     # Agent takes an action based on the latest observation and info
                     info['iteration'] = i/TOTAL_ITERATIONS
-                    action = agent.take_action(info['agent_pos'], info)
+                    action = agent.take_action(env.coord_to_array()[0], info)
 
                     # The action is performed in the environment
                     obs, reward, terminated, info = env.step([action])
 
-                    agent.process_reward(info['agent_pos'], reward, action, terminated)
+                    agent.process_reward(env.coord_to_array()[0], reward, action, terminated)
 
                     # If the agent is terminated, we reset the env.
                     if terminated:
@@ -94,7 +94,7 @@ def main(
                 print(world_stats)
 
             info['iteration'] = 0
-            Environment.evaluate_agent(grid, dynamics_fp, [agent], 1000, out_runs, 0.0, agent_start_pos=[(1, 1)])
+            Environment.evaluate_agent(grid, dynamics_fp, [agent], 1000, out_runs, 0.1, agent_start_pos=[(1, 1)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(1, 8)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(8, 1)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(8, 8)])
@@ -107,7 +107,7 @@ def main(
 
 if __name__ == "__main__":
     main(
-        grid_paths=[Path("grid_configs/supersimple.grd")],
+        grid_paths=[Path("grid_configs/easytest.grd")],
         dynamics_fp=Path("dynamic_env_config/test2.json"),
         no_gui=False,
         iters=1000,

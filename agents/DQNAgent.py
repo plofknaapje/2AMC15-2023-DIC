@@ -17,9 +17,9 @@ from collections import deque
 class DQN(nn.Module):
     def __init__(self, num_inputs, num_actions):
         super(DQN, self).__init__()
-        self.fc1 = nn.Linear(num_inputs, 32)
-        self.fc2 = nn.Linear(32, 32)
-        self.fc3 = nn.Linear(32, num_actions)
+        self.fc1 = nn.Linear(num_inputs, 128)
+        self.fc2 = nn.Linear(128, 64)
+        self.fc3 = nn.Linear(64, num_actions)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -29,7 +29,7 @@ class DQN(nn.Module):
 
 
 class DQNAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, epsilon=0.4, alpha=0.08):
+    def __init__(self, agent_number: int, gamma: float, grid_size: int, epsilon=0.4, alpha=0.001):
         """
         Set agent parameters.
 
@@ -48,9 +48,11 @@ class DQNAgent(BaseAgent):
         self.alpha = alpha
         self.num_actions = 4
 
+        self.grid_size = grid_size
+
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.Q_network = DQN(2, self.num_actions).to(self.device)
-        self.target_network = DQN(2, self.num_actions).to(self.device)
+        self.Q_network = DQN(self.grid_size, self.num_actions).to(self.device)
+        self.target_network = DQN(self.grid_size, self.num_actions).to(self.device)
         self.target_network.load_state_dict(self.Q_network.state_dict())
         self.target_network.eval()
 
@@ -65,7 +67,7 @@ class DQNAgent(BaseAgent):
         self.buffer_max_size = 50000
         self.buffer_min_size = 1000
         self.replay_buffer = deque(maxlen=self.buffer_max_size)
-        self.batch_size = 32
+        self.batch_size = 64
         self.target_update_freq = 1000
 
         self.reward_buffer = deque(maxlen=1000)
@@ -77,8 +79,6 @@ class DQNAgent(BaseAgent):
         #     self.alpha_decay * (reward + self.gamma * np.max(
         #         self.Q[self.new_state[0], self.new_state[1], self.new_state[2], :]) -
         #                         self.Q[self.state[0], self.state[1], self.state[2], action])
-
-        pos = torch.tensor([pos[0][0], pos[0][1]]).to(self.device)
 
         self.new_state = torch.tensor(pos.flatten(), dtype=torch.float32).unsqueeze(0).to(self.device)
         transition = (self.state, action, reward, done, self.new_state)
@@ -131,7 +131,6 @@ class DQNAgent(BaseAgent):
 
         self.epsilon = max(self.epsilon * (1 - (self.step / self.epsilon_decay_steps)), self.epsilon_min)
 
-        pos = torch.tensor([pos[0][0], pos[0][1]]).to(self.device)
         self.state = torch.tensor(pos.flatten(), dtype=torch.float32).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
@@ -145,7 +144,6 @@ class DQNAgent(BaseAgent):
         return action
 
     def take_action_eval(self, pos: np.ndarray, info: None | dict):
-        pos = torch.tensor([pos[0][0], pos[0][1]]).to(self.device)
         self.state = torch.tensor(pos.flatten(), dtype=torch.float32).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
