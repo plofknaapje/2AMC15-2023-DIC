@@ -20,7 +20,7 @@ def powerset(iterable):
 class ValueAgent(BaseAgent):
     def __init__(self, agent_number: int, gamma: float, verbose=False, theta=0.1):
         """
-        Set agent parameters.
+        ValueAgent. Set agent parameters.
 
         Args:
             agent_number (int): The index of the agent in the environment.
@@ -33,6 +33,7 @@ class ValueAgent(BaseAgent):
         self.theta = theta
         self.values = None
         self.verbose = verbose
+        self.dirt_cleaned = []
 
     def process_reward(self, observation: np.ndarray, reward: float):
         """
@@ -65,10 +66,12 @@ class ValueAgent(BaseAgent):
 
         agent_space = info["agent_pos"][self.agent_number]
 
-        dirt_left = tuple(space for space in self.spaces
-                          if observation[space] == 3 and space != agent_space)
+        # The robot keeps track of where it cleaned dirt.
+        if agent_space in self.dirt_spaces and agent_space not in self.dirt_cleaned:
+            self.dirt_cleaned.append(agent_space)
+            self.dirt_cleaned.sort()
 
-        state = (agent_space, dirt_left)
+        state = (agent_space, tuple(self.dirt_cleaned))
 
         return self.generate_move(state)
 
@@ -80,9 +83,6 @@ class ValueAgent(BaseAgent):
 
         Args:
             observation (np.ndarray): Current environment grid.
-
-        Raises:
-            ValueError:
         """
         cols, rows = observation.shape
 
@@ -133,13 +133,15 @@ class ValueAgent(BaseAgent):
                 old_value = self.values[state]
                 self.values[state] = self.max_action(state)[0]
                 delta = max(delta, abs(self.values[state] - old_value))
+            
+            # Optional progress update
             if self.verbose:
                 print(f"Iter {i} with delta {delta:.2f}")
                 i += 1
 
-    def max_action(self, state: tuple[tuple, tuple]) -> tuple[float, int]:
+    def max_action(self, state: tuple) -> tuple[float, int]:
         """
-        Try all actions from the current state and determine the action with
+        Try all possible actions from the current state and determine the action with
         the highest expected value.
 
         Args:
@@ -152,16 +154,17 @@ class ValueAgent(BaseAgent):
 
         if state[0] in self.charge_spaces and len(state[1]) == 0:
             value_action.append((100.0, 4))
-
+    	
+        # Build in reward function. Dirt is 10 points, charging is 100 points, hiting the charger is -1.
         for action in (0, 1, 2, 3, 4):
             new_state = self.action_outcome(state, action)
-            new_space, dirt_left = new_state
+            new_space, dirt_cleaned = new_state
 
             if new_space == (-1, -1):
                 continue
-            elif new_space in dirt_left:
+            elif new_space in dirt_cleaned:
                 value = 10
-            elif new_space in self.charge_spaces and len(dirt_left) == 0:
+            elif new_space in self.charge_spaces and len(dirt_cleaned) == 0:
                 value = 100
             elif new_space in self.charge_spaces:
                 value = -1
@@ -173,25 +176,26 @@ class ValueAgent(BaseAgent):
 
         return max(value_action)
 
-    def action_outcome(self, state: tuple[tuple, tuple], action: int) -> tuple[tuple, tuple]:
+    def action_outcome(self, state: tuple, action: int) -> tuple:
         """
         Determines the result of a certain action when taken in a certain place.
 
         Args:
-            state (tuple[tuple, tuple]): Current state of the agent.
+            state (tuple): Current state of the agent.
             action (int): Action to be taken.
 
         Returns:
-            tuple[tuple, tuple]: Resulting state. (-1, -1) if the action is illegal.
+            tuple: Resulting state. ((-1, -1), ()) if the action is illegal.
         """
         # Col - row
-        space, dirt_left = state
+        space, dirt_cleaned = state
         x, y = space
 
-        if space in dirt_left:
-            temp = list(dirt_left)
-            temp.remove(space)
-            dirt_left = tuple(temp)
+        if space in self.dirt_spaces and space not in dirt_cleaned:
+            temp = list(dirt_cleaned)
+            temp.append(space)
+            temp.sort()
+            dirt_cleaned = tuple(temp)
 
         match action:
             case 0:  # Down
@@ -206,16 +210,16 @@ class ValueAgent(BaseAgent):
                 new_space = space
 
         if new_space in self.spaces:
-            return (new_space, dirt_left)
+            return (new_space, dirt_cleaned)
         else:
             return ((-1, -1), ())
 
-    def generate_move(self, state: tuple[tuple, tuple]) -> int:
+    def generate_move(self, state: tuple) -> int:
         """
         Generates the best move for a state.
 
         Args:
-            state (tuple[tuple, tuple]): Current state
+            state (tuple): Current state
 
         Returns:
             int: Action to be taken.

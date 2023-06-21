@@ -5,11 +5,10 @@ from pathlib import Path
 from tqdm import trange
 
 try:
-
-    # Add your agents here
     from agents.value_agent import ValueAgent
 
     from world.environment_ref import Environment
+
 except ModuleNotFoundError:
     import sys
     from os import pardir, path
@@ -69,9 +68,8 @@ def main(
         obs, info = env.get_observation()
         # Add agents with different configurations here
         agents = [
-            # GreedyAgent(0),
-            ValueAgent(0, gamma=0.9),
-            ValueAgent(0, gamma=0.6)
+            ValueAgent(0, gamma=0.99),
+            ValueAgent(0, gamma=0.7)
         ]
 
         # Iterate through each agent for `iters` iterations
@@ -82,36 +80,31 @@ def main(
                 action = agent.take_action(obs, info)
 
                 # The action is performed in the environment
-                obs, _, terminated, info = env.step([action])
+                obs, reward, terminated, info = env.step([action])
 
                 # If the agent is terminated, we reset the env.
                 if terminated:
                     obs, info, world_stats = env.reset()
                     break
-
+                    
             obs, info, world_stats = env.reset()
 
-            # Only go here AFTER training
-            print("")
-            print(str(agent))
             # Add starting spaces here
             starts = [(2, 2)]
 
             for start in starts:
-                for sigma in [0.0, 0.25]:
-                    # print(f"{agent}, start={start}, sigma={sigma}")
-                    world_stats = Environment.evaluate_agent(
-                        grid, [agent], 1000, out_runs, sigma,
-                        agent_start_pos=[start], random_seed=0)
-                    world_stats["start"] = start
-                    world_stats["agent"] = str(agent)
-                    world_stats["room"] = room_name
-                    world_stats["sigma"] = sigma
-                    results.append(world_stats)
+                world_stats = Environment.evaluate_agent(
+                    grid, [agent], 1000, out_runs, sigma=0.0,
+                    agent_start_pos=[start], random_seed=0)
+                world_stats["start"] = start
+                world_stats["agent"] = str(agent)
+                world_stats["room"] = room_name
+                world_stats["sigma"] = sigma
+                results.append(world_stats)
 
     results = pd.DataFrame.from_records(results)
     print(results)
-    # results.to_csv(out_experiments / "value_iteration_results.csv", index=False)
+    results.to_csv(out_experiments / "value_iteration_results.csv", index=False)
 
 
 if __name__ == "__main__":

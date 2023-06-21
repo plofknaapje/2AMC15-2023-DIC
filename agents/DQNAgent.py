@@ -12,12 +12,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from collections import deque
+from pathlib import Path
 
 
 class DQN(nn.Module):
     def __init__(self, num_inputs: int, num_actions: int):
         """
-        DQN agent. Creates a new DQN agent.
+        DQN. Creates a new Deep Q-learning Network.
 
         Args:
             num_inputs (int): size of the input data.
@@ -75,7 +76,6 @@ class DQNAgent(BaseAgent):
         # Agent parameters
         self.grid_size = grid_size + 30
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        
         self.buffer_max_size = 50000
         self.buffer_min_size = 1000
         self.replay_buffer = deque(maxlen=self.buffer_max_size)
@@ -84,16 +84,12 @@ class DQNAgent(BaseAgent):
         self.reward_buffer = deque(maxlen=1000)
         self.num_actions = 4
 
-
         # Agent information
         self.Q_network = DQN(self.grid_size, self.num_actions).to(self.device)
         self.target_network = DQN(self.grid_size, self.num_actions).to(self.device)
         self.target_network.load_state_dict(self.Q_network.state_dict())
         self.target_network.eval()
         self.step = 0
-
-        # self.dirtGrid = np.zeros(4)
-
         self.state = [0, 0, 0]
         self.new_state = [0, 0, 0]
 
@@ -116,11 +112,15 @@ class DQNAgent(BaseAgent):
         transition = (self.state, action, reward, done, self.new_state)
         self.replay_buffer.append(transition)
         self.state = self.new_state
-
         self.reward_buffer.append(reward)
 
     def train(self):
+        """
+        Trains the complete agent based on the defined hyperparameters and learning infrastructure.
+        """        
         if len(self.replay_buffer) > self.batch_size:
+
+            # Data preparation
             batch = random.sample(self.replay_buffer, self.batch_size)
             state_batch, action_batch, reward_batch, done_batch, new_state_batch = zip(*batch)
 
@@ -130,41 +130,50 @@ class DQNAgent(BaseAgent):
             done_batch = torch.tensor(done_batch).unsqueeze(1).to(self.device)
             new_state_batch = torch.stack(new_state_batch).to(self.device)
 
-
+            # Push data through the network
             Q_values = self.Q_network(state_batch)
             max_new_Q_values = self.target_network(new_state_batch)
             max_new_Q_values = torch.max(max_new_Q_values, dim=2)[0]
-
             expected_Q_values = reward_batch + self.gamma * max_new_Q_values * (1 - done_batch)
 
             action_batch = action_batch.unsqueeze(1).unsqueeze(1)
-
             action_q_values = torch.gather(input=Q_values, dim=2, index=action_batch)
             action_q_values = action_q_values.squeeze(1)
 
+            # Process results
             loss = F.smooth_l1_loss(action_q_values, expected_Q_values)
-
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
             self.step = self.step + 1
+            # Target network update step
             if self.step % self.target_update_freq == 0:
                 self.target_network.load_state_dict(self.Q_network.state_dict())
                 print(np.mean(self.reward_buffer))
                 print(self.step)
                 print(self.epsilon)
 
-    def take_action(self, pos: np.ndarray, info: None | dict):
+    def take_action(self, pos: np.ndarray, info: None | dict) -> int:
+        """
+        Take an action in the training phase.
 
+        Args:
+            pos (np.ndarray): current position.
+            info (None | dict): environment info.
+
+        Returns:
+            int: action to be taken.
+        """        
         self.train()
+        # Epsilon is decreased over time
         self.epsilon = max(self.epsilon_start * (1 - info['iteration']), self.epsilon_min)
-
         self.state = torch.tensor(pos.flatten(), dtype=torch.float32).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
             q_values = self.Q_network(self.state)
 
+        # Choose random actions sometimes.
         if np.random.uniform(0, 1) < self.epsilon:
             action = random.randint(0, self.num_actions - 1)
         else:
@@ -172,7 +181,17 @@ class DQNAgent(BaseAgent):
 
         return action
 
-    def take_action_eval(self, pos: np.ndarray, info: None | dict):
+    def take_action_eval(self, pos: np.ndarray, info: None | dict) -> int:
+        """
+        Take an action in the evaluation phase
+
+        Args:
+            pos (np.ndarray): current position.
+            info (None | dict): environment info.
+
+        Returns:
+            int: action to be taken.
+        """        
         self.state = torch.tensor(pos.flatten(), dtype=torch.float32).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
@@ -183,10 +202,20 @@ class DQNAgent(BaseAgent):
 
         return action
 
+    def save_model(self):
+        """
+        Save the trained Q network to the DQN_models folder with its settings.
+        """        
+        torch.save(self.Q_network.state_dict(), 
+                   Path("DQN_models/model_updaterate{}_gamma{}_alpha{}.pt".format(self.target_update_freq, self.gamma, self.alpha)))
 
-    def save_model(self, Path):
-        torch.save(self.Q_network.state_dict(), Path("DQN_models/model_updaterate{}_gamma{}_alpha{}.pt".format(self.target_update_freq, self.gamma, self.alpha)))
 
+    def load_model(self, model_path: str | Path):
+        """
+        Load a trained Q network from the supplied path
 
-    def load_model(self, model_path):
+        Args:
+            model_path (str | Path): path to the saved model.
+        """
         self.Q_network.load_state_dict(torch.load(model_path))
+    
