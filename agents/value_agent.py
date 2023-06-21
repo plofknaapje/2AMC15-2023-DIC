@@ -102,10 +102,6 @@ class ValueAgent(BaseAgent):
         ]
 
         dirt_configs = powerset(self.dirt_spaces)
-        complexity = 2**len(self.dirt_spaces)
-        if complexity > 20000:
-            print(f"{complexity} possible dirt states per space.")
-            print("This number increases exponentially with the number of dirt spaces.")
 
         self.states = [
             (space, dirt_left)
@@ -117,6 +113,10 @@ class ValueAgent(BaseAgent):
             state: 0
             for state in self.states
         }
+
+        if self.verbose and len(self.states) > 5000:
+            print(f"{len(self.states)} states to optimize.")
+            print("This number increases exponentially with the number of dirt spaces.")
 
         self.value_iteration()
 

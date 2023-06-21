@@ -5,11 +5,11 @@ from pathlib import Path
 from tqdm import trange
 
 try:
-    from agents.greedy_agent import GreedyAgent
 
     # Add your agents here
     from agents.value_agent import ValueAgent
-    from world import Environment
+
+    from world.environment_ref import Environment
 except ModuleNotFoundError:
     import sys
     from os import pardir, path
@@ -21,15 +21,13 @@ except ModuleNotFoundError:
     if root_path not in sys.path:
         sys.path.extend(root_path)
 
-    from agents.greedy_agent import GreedyAgent
-
     from agents.value_agent import ValueAgent
-    from world import Environment
+    from world.environment_ref import Environment
 
 import pandas as pd
 
 
-def train(
+def main(
     grid_paths: list[Path],
     no_gui: bool,
     iters: int,
@@ -60,7 +58,7 @@ def train(
 
         env = Environment(
             grid,
-            no_gui,
+            no_gui=no_gui,
             n_agents=1,
             agent_start_pos=None,
             sigma=sigma,
@@ -84,30 +82,24 @@ def train(
                 action = agent.take_action(obs, info)
 
                 # The action is performed in the environment
-                obs, reward, terminated, info = env.step([action])
+                obs, _, terminated, info = env.step([action])
 
                 # If the agent is terminated, we reset the env.
                 if terminated:
                     obs, info, world_stats = env.reset()
                     break
 
-                agent.process_reward(obs, reward)
             obs, info, world_stats = env.reset()
 
             # Only go here AFTER training
             print("")
             print(str(agent))
             # Add starting spaces here
-            if room_name == "simple_grid.grd":
-                starts = [(1, 1), (8, 1), (1, 8), (8, 8)]
-            elif room_name == "multi_room.grd":
-                starts = [(1, 1), (8, 1), (1, 8), (8, 8)]
-            else:
-                raise ValueError("No valid room name!")
+            starts = [(2, 2)]
 
             for start in starts:
                 for sigma in [0.0, 0.25]:
-                    print(f"{agent}, start={start}, sigma={sigma}")
+                    # print(f"{agent}, start={start}, sigma={sigma}")
                     world_stats = Environment.evaluate_agent(
                         grid, [agent], 1000, out_runs, sigma,
                         agent_start_pos=[start], random_seed=0)
@@ -118,15 +110,17 @@ def train(
                     results.append(world_stats)
 
     results = pd.DataFrame.from_records(results)
-    results.to_csv(out_experiments / "value_iteration_results.csv", index=False)
+    print(results)
+    # results.to_csv(out_experiments / "value_iteration_results.csv", index=False)
 
 
 if __name__ == "__main__":
-    train(
-        grid_paths=[Path("grid_configs/simple_grid.grd"),
-                    Path("grid_configs/multi_room.grd")],
+    main(
+        grid_paths=[Path("grid_configs\warehouse_stat_3.grd"),
+                   Path("grid_configs\warehouse_stat_5.grd"),
+                   Path("grid_configs\warehouse_stat_8.grd")],
         no_gui=True,
-        iters=100,
+        iters=10,
         fps=10,
         sigma=0,
         out_runs=Path("results/"),

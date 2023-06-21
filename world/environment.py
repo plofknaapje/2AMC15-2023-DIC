@@ -43,7 +43,7 @@ except ModuleNotFoundError:
 class Environment:
     def __init__(
         self,
-        grid_fp: Path,
+        grid_fp: Path | None,
         dynamics_fp: Path,
         no_gui: bool = False,
         n_agents: int = 1,
@@ -706,7 +706,7 @@ class Environment:
     @staticmethod
     def evaluate_agent(
         grid_fp: Path,
-        dynamics_fp: Path,
+        dynamics_fp: Path | None,
         agents: list[BaseAgent],
         max_steps: int,
         out_dir: Path,
