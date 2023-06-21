@@ -15,15 +15,33 @@ from collections import deque
 
 
 class DQN(nn.Module):
-    def __init__(self, num_inputs, num_actions):
+    def __init__(self, num_inputs: int, num_actions: int):
+        """
+        DQN agent. Creates a new DQN agent.
+
+        Args:
+            num_inputs (int): size of the input data.
+            num_actions (int): number of possible actions.
+        """        
         super(DQN, self).__init__()
+        # neural network with 5 layers.
         self.fc1 = nn.Linear(num_inputs, 128)
         self.fc2 = nn.Linear(128, 128)
         self.fc3 = nn.Linear(128, 128)
         self.fc4 = nn.Linear(128, 32)
         self.fc5 = nn.Linear(32, num_actions)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the DQN.
+
+        Args:
+            x (torch.Tensor): input data of the network.
+
+        Returns:
+            torch.Tensor: output of the network.
+        """
+        # Every hidden layer passes through ReLU activation.        
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
@@ -44,55 +62,62 @@ class DQNAgent(BaseAgent):
             epsilon: epsilon greedy
             alpha: learning rate
         """
+
         super().__init__(agent_number)
+
+        # Agent hyperparameters.
         self.gamma = gamma
         self.epsilon_start = epsilon
         self.epsilon = epsilon
-
         self.epsilon_min = 0.02
         self.alpha = alpha
-        self.num_actions = 4
 
+        # Agent parameters
         self.grid_size = grid_size + 30
-
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.Q_network = DQN(self.grid_size, self.num_actions).to(self.device)
-        self.target_network = DQN(self.grid_size, self.num_actions).to(self.device)
-        self.target_network.load_state_dict(self.Q_network.state_dict())
-        self.target_network.eval()
-
-        self.dirtGrid = np.zeros(4)
-
-        self.state = [0, 0, 0]
-        self.new_state = [0, 0, 0]
-
-        self.optimizer = optim.Adam(self.Q_network.parameters(), lr=self.alpha)
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+        
         self.buffer_max_size = 50000
         self.buffer_min_size = 1000
         self.replay_buffer = deque(maxlen=self.buffer_max_size)
         self.batch_size = 64
         self.target_update_freq = 1000
-
         self.reward_buffer = deque(maxlen=1000)
+        self.num_actions = 4
+
+
+        # Agent information
+        self.Q_network = DQN(self.grid_size, self.num_actions).to(self.device)
+        self.target_network = DQN(self.grid_size, self.num_actions).to(self.device)
+        self.target_network.load_state_dict(self.Q_network.state_dict())
+        self.target_network.eval()
         self.step = 0
 
-    def process_reward(self, pos: np.ndarray, reward: float, action: int, done: int):
-        # # update the Q function
-        # self.Q[self.state[0], self.state[1], self.state[2], action] += \
-        #     self.alpha_decay * (reward + self.gamma * np.max(
-        #         self.Q[self.new_state[0], self.new_state[1], self.new_state[2], :]) -
-        #                         self.Q[self.state[0], self.state[1], self.state[2], action])
+        # self.dirtGrid = np.zeros(4)
 
+        self.state = [0, 0, 0]
+        self.new_state = [0, 0, 0]
+
+        # Agent learning infrastructure
+        self.optimizer = optim.Adam(self.Q_network.parameters(), lr=self.alpha)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+    def process_reward(self, pos: np.ndarray, reward: float, action: int, done: int):
+        """
+        Process the rewards of the past actions.
+
+        Args:
+            pos (np.ndarray): current position of the agent.
+            reward (float): reward of the action(s).
+            action (int): action chosen.
+            done (int): action was actually taken.
+        """        
         self.new_state = torch.tensor(pos.flatten(), dtype=torch.float32).unsqueeze(0).to(self.device)
         transition = (self.state, action, reward, done, self.new_state)
         self.replay_buffer.append(transition)
         self.state = self.new_state
 
         self.reward_buffer.append(reward)
-
-        return 0
 
     def train(self):
         if len(self.replay_buffer) > self.batch_size:
