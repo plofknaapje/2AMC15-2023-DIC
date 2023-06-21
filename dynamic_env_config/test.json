@@ -16,25 +16,6 @@
     }
   ],
   "persons": [
-    {
-      "id": 1,
-      "position" : [2,3]
 
-    },
-    {
-      "id": 2,
-      "position" : [16,8]
-
-    },
-       {
-      "id": 3,
-      "position" : [2,5]
-
-    },
-       {
-      "id": 4,
-      "position" : [2,12]
-
-    }
   ]
 }

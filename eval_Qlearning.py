@@ -66,46 +66,18 @@ def main(
         )
         obs, info = env.get_observation()
 
-        # Iterate through each agent for `iters` iterations
-        TOTAL_ITERATIONS = 2
+
 
         # Set up the agents from scratch for every grid
         # Add your agents here
         agents = [
-            DQNAgent(0, 0.99, len(env.coord_to_array()[0])*len(env.coord_to_array()[0][0]), epsilon=0.99)
+            DQNAgent(0, 0.99, len(env.coord_to_array()[0])*len(env.coord_to_array()[0][0]), epsilon=0.99)           
         ]
 
 
         for agent in agents:
-            for i in range(TOTAL_ITERATIONS):
-                print(i)
-                for _ in trange(iters):
-                    # Agent takes an action based on the latest observation and info
-                    info['iteration'] = i/TOTAL_ITERATIONS
-                    # print(env.coord_to_array()[0].flatten())
-                    # print(info['dirt_vecs'])
-
-                    input_nn = np.concatenate((np.array(env.coord_to_array()[0].flatten()), np.array(info['dirt_vecs'][0])))
-
-                    action = agent.take_action(input_nn, info)
-
-                    # The action is performed in the environment
-                    obs, reward, terminated, info = env.step([action])
-
-                    input_nn = np.concatenate(
-                        (np.array(env.coord_to_array()[0].flatten()), np.array(info['dirt_vecs'][0])))
-
-                    agent.process_reward(input_nn, reward, action, terminated)
-
-                    # If the agent is terminated, we reset the env.
-                    if terminated:
-                        break
-                obs, info, world_stats = env.reset()
-                print(world_stats)
-
-            info['iteration'] = 0
+            agent.load_model(Path("DQN_models/model_updaterate1000_gamma0.99_alpha0.001.pt"))
             Environment.evaluate_agent(grid, dynamics_fp, [agent], 1000, out_runs, 0.1, agent_start_pos=[(2, 2)])
-            agent.save_model(Path)
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(1, 8)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(8, 1)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.0, agent_start_pos=[(8, 8)])
@@ -114,7 +86,7 @@ def main(
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.25, agent_start_pos=[(1, 8)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.25, agent_start_pos=[(8, 1)])
             # Environment.evaluate_agent(grid, [agent], 1000, out_runs, 0.25, agent_start_pos=[(8, 8)])
-
+            
 
 if __name__ == "__main__":
     main(

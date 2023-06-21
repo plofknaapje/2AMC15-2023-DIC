@@ -159,6 +159,9 @@ class DQNAgent(BaseAgent):
         return action
 
 
+    def save_model(self, Path):
+        torch.save(self.Q_network.state_dict(), Path("DQN_models/model_updaterate{}_gamma{}_alpha{}.pt".format(self.target_update_freq, self.gamma, self.alpha)))
 
 
-
+    def load_model(self, model_path):
+        self.Q_network.load_state_dict(torch.load(model_path))
