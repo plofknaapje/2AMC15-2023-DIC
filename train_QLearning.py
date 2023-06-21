@@ -3,7 +3,7 @@
 Trains the Q-Learning Agent and reports the results
 """
 from pathlib import Path
-
+from world.vision import agent_vision
 from tqdm import trange
 
 try:
@@ -71,7 +71,7 @@ def main(
                 for _ in trange(iters):
                     # Agent takes an action based on the latest observation and info
                     info['iteration'] = i/TOTAL_ITERATIONS
-                    action = agent.take_action(obs, info)
+                    action = agent.take_action(agent_vision(location, obs, 1), info)
 
                     # The action is performed in the environment
                     obs, reward, terminated, info = env.step([action])

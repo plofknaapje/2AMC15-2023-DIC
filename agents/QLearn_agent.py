@@ -20,6 +20,7 @@ class CustomState:
         self.pos = pos
         self.is_terminal = is_terminal
 
+
     def __hash__(self) -> int:
         """Ensure state is hashable to make it easier to work with"""
         return hash((np.array2string(self.grid), self.pos))
