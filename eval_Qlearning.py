@@ -71,7 +71,20 @@ def main(
         # Set up the agents from scratch for every grid
         # Add your agents here
         agents = [
-            DQNAgent(0, 0.99, len(env.coord_to_array()[0])*len(env.coord_to_array()[0][0]), epsilon=0.99)           
+            DQNAgent(0, gamma=0.99, alpha=0.001, target_update_freq=1000,
+                     grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
+            DQNAgent(0, gamma=0.99, alpha=0.001, target_update_freq=500,
+                     grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
+            DQNAgent(0, gamma=0.99, alpha=0.0001, target_update_freq=1000,
+                     grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
+            DQNAgent(0, gamma=0.99, alpha=0.0001, target_update_freq=500,
+                     grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
+            DQNAgent(0, gamma=0.7, alpha=0.001, target_update_freq=1000,
+                     grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
+            DQNAgent(0, gamma=0.7, alpha=0.001, target_update_freq=500,
+                     grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
+            DQNAgent(0, gamma=0.7, alpha=0.0001, target_update_freq=1000,
+                     grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
         ]
 
 
@@ -90,7 +103,7 @@ def main(
 
 if __name__ == "__main__":
     main(
-        grid_paths=[Path("grid_configs/warehouse_dyn_3.grd")],
+        grid_paths=[Path("grid_configs/warehouse_dyn_5.grd")],
         dynamics_fp=Path("dynamic_env_config/test.json"),
         no_gui=False,
         iters=1000,

@@ -52,7 +52,7 @@ class DQN(nn.Module):
 
 
 class DQNAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, grid_size: int, epsilon=0.4, alpha=0.001):
+    def __init__(self, agent_number: int, gamma: float, grid_size: int, epsilon=0.4, alpha=0.001, target_update_freq = 1000):
         """
         Set agent parameters.
 
@@ -80,7 +80,7 @@ class DQNAgent(BaseAgent):
         self.buffer_min_size = 1000
         self.replay_buffer = deque(maxlen=self.buffer_max_size)
         self.batch_size = 64
-        self.target_update_freq = 1000
+        self.target_update_freq = target_update_freq
         self.reward_buffer = deque(maxlen=1000)
         self.num_actions = 4
 
@@ -207,7 +207,7 @@ class DQNAgent(BaseAgent):
         Save the trained Q network to the DQN_models folder with its settings.
         """        
         torch.save(self.Q_network.state_dict(), 
-                   Path("DQN_models/model_updaterate{}_gamma{}_alpha{}.pt".format(self.target_update_freq, self.gamma, self.alpha)))
+                   Path("DQN_models/model_updaterate{}_gamma{}_alpha{}_dynamic.pt".format(self.target_update_freq, self.gamma, self.alpha)))
 
 
     def load_model(self, model_path: str | Path):
