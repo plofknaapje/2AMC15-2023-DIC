@@ -131,8 +131,8 @@ def main(
 
 if __name__ == "__main__":
     main(
-        grid_paths=[Path("grid_configs/warehouse_dyn_5.grd")],
-        dynamics_fp=Path("dynamic_env_config/test.json"),
+        grid_paths=[Path("grid_configs/warehouse_stat_5.grd")],
+        dynamics_fp=Path("dynamic_env_config/test2.json"),
         no_gui=False,
         iters=1000,
         fps=10,

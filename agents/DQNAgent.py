@@ -202,12 +202,12 @@ class DQNAgent(BaseAgent):
 
         return action
 
-    def save_model(self):
+    def save_model(self,Path):
         """
         Save the trained Q network to the DQN_models folder with its settings.
         """        
         torch.save(self.Q_network.state_dict(), 
-                   Path("DQN_models/model_updaterate{}_gamma{}_alpha{}_dynamic.pt".format(self.target_update_freq, self.gamma, self.alpha)))
+                   Path("DQN_models/model_static_updaterate{}_gamma{}_alpha{}_dynamic.pt".format(self.target_update_freq, self.gamma, self.alpha)))
 
 
     def load_model(self, model_path: str | Path):
