@@ -197,7 +197,7 @@ class DQNAgent(BaseAgent):
         with torch.no_grad():
             q_values = self.Q_network(self.state)
 
-        print(q_values)
+        # print(q_values)
         action = q_values.argmax(dim=1).item()
 
         return action
