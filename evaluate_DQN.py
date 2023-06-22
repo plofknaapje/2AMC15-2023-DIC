@@ -61,6 +61,8 @@ def main(
                      grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
             DQNAgent(0, gamma=0.7, alpha=0.0001, target_update_freq=1000,
                      grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
+            DQNAgent(0, gamma=0.7, alpha=0.0001, target_update_freq=500,
+                     grid_size=len(env.coord_to_array()[0]) * len(env.coord_to_array()[0][0]), epsilon=0.99),
         ]
 
         for agent in agents:

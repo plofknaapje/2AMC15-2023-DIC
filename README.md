@@ -1,5 +1,6 @@
 # 2AMC15-2023-DIC Group 10
-
+In this repository, you will find all the code which we used for the second assignment. We used two different agents,
+value iteration and Deep Q-Learning, 
 
 
 ## Quickstart
@@ -34,9 +35,10 @@ The train files will store their results as CSV files in the `experiments` folde
 Each evaluation of the agent will also result in an image of the path and a text file in the `results` folder.
 
 ## File structure and changes to the provided repository
-We kept the same overall file structure and added some things. We added a folder for storing the trained DQN models and a folder for storing the results of the experiments. We also created a second environment 
-in the `environment_dqn.py` file
-
+We kept the same overall file structure and added some things. We added a folder for storing the trained DQN models, 
+a folder for storing the results of the experiments and a folder with the configurations of our dynamic environment.
+We also created a second environment class, `EnvironmentDQN`, which is customised for the DQN agent. This environment
+also includes the functionality to have moving objects in the environment. 
 
 ## Requirements
 
