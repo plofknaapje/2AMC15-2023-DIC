@@ -4,12 +4,10 @@ Calculates the values of each state and determines the optimal policy based on
 the most valuable state."""
 
 import numpy as np
-
-from agents import BaseAgent
-
 from itertools import chain, combinations
 from time import time
 
+from agents import BaseAgent
 
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
@@ -70,6 +68,8 @@ class ValueAgent(BaseAgent):
         if agent_space in self.dirt_spaces and agent_space not in self.dirt_cleaned:
             self.dirt_cleaned.append(agent_space)
             self.dirt_cleaned.sort()
+            if self.verbose:
+                print(self.dirt_cleaned)
 
         state = (agent_space, tuple(self.dirt_cleaned))
 
@@ -85,29 +85,30 @@ class ValueAgent(BaseAgent):
             observation (np.ndarray): Current environment grid.
         """
         cols, rows = observation.shape
+        self.diagonal = cols + rows
 
-        self.spaces = [
+        self.spaces = tuple(
             (i, j) for i in range(cols) for j in range(rows)
             if observation[i, j] in (0, 3, 4)
-        ]
+        )
 
-        self.charge_spaces = [
+        self.charge_spaces = tuple(
             space for space in self.spaces
             if observation[space] == 4
-        ]
+        )
 
-        self.dirt_spaces = [
+        self.dirt_spaces = tuple(
             space for space in self.spaces
             if observation[space] == 3
-        ]
+        )
 
         dirt_configs = powerset(self.dirt_spaces)
 
-        self.states = [
-            (space, dirt_left)
+        self.states = tuple(
+            (space, dirt_cleaned)
             for space in self.spaces
-            for dirt_left in dirt_configs
-        ]
+            for dirt_cleaned in dirt_configs
+        )
 
         self.values = {
             state: 0
@@ -145,15 +146,12 @@ class ValueAgent(BaseAgent):
         the highest expected value.
 
         Args:
-            state (tuple[tuple, tuple]): current state of the agent.
+            state (tuple): current state of the agent.
 
         Returns:
             tuple[float, int]: value, action pair with the highest value.
         """
         value_action = []
-
-        if state[0] in self.charge_spaces and len(state[1]) == 0:
-            value_action.append((100.0, 4))
     	
         # Build in reward function. Dirt is 10 points, charging is 100 points, hiting the charger is -1.
         for action in (0, 1, 2, 3, 4):
@@ -162,16 +160,16 @@ class ValueAgent(BaseAgent):
 
             if new_space == (-1, -1):
                 continue
-            elif new_space in dirt_cleaned:
+            elif new_space in self.dirt_spaces and new_space not in dirt_cleaned:
                 value = 10
-            elif new_space in self.charge_spaces and len(dirt_cleaned) == 0:
+                dirt_cleaned = tuple(sorted(list(dirt_cleaned) + [new_space]))
+            elif new_space in self.charge_spaces and dirt_cleaned == self.dirt_spaces:
                 value = 100
             elif new_space in self.charge_spaces:
                 value = -1
             else:
                 value = 0
             new_value = value + self.values[new_state] * self.gamma
-
             value_action.append((new_value, action))
 
         return max(value_action)
@@ -190,12 +188,6 @@ class ValueAgent(BaseAgent):
         # Col - row
         space, dirt_cleaned = state
         x, y = space
-
-        if space in self.dirt_spaces and space not in dirt_cleaned:
-            temp = list(dirt_cleaned)
-            temp.append(space)
-            temp.sort()
-            dirt_cleaned = tuple(temp)
 
         match action:
             case 0:  # Down
@@ -225,6 +217,12 @@ class ValueAgent(BaseAgent):
             int: Action to be taken.
         """
         return self.max_action(state)[1]
+    
+    def reset(self):
+        """
+        Reset dirt state memory
+        """
+        self.dirt_cleaned = []
 
     def __str__(self):
         return f"ValueAgent({self.agent_number}, {self.gamma})"

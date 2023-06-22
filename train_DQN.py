@@ -1,7 +1,21 @@
 from pathlib import Path
-from agents.DQNAgent import DQNAgent
-from world import Environment
 
+try:
+    from agents.DQNAgent import DQNAgent
+    from world.environment import EnvironmentDQN
+except ModuleNotFoundError:
+    import sys
+    from os import pardir, path
+
+    root_path = path.abspath(
+        path.join(path.join(path.abspath(__file__), pardir), pardir)
+    )
+
+    if root_path not in sys.path:
+        sys.path.extend(root_path)
+
+    from agents.DQNAgent import DQNAgent
+    from world.environment import EnvironmentDQN
 
 def main(
     grid_paths: list[Path],
@@ -28,7 +42,7 @@ def main(
 
     for dynamics_file, grid_file in zip(dynamics_fp, grid_paths):
         # Set up the environment and reset it to its initial state
-        env = Environment(
+        env = EnvironmentDQN(
             grid_file,
             dynamics_file,
             no_gui=no_gui,
@@ -71,7 +85,7 @@ def main(
             agent.load_model(model_weights_path)
 
             # Evaluate the agent
-            Environment.evaluate_agent(grid_file, dynamics_file, [agent], iters, out_runs, 0.3, agent_start_pos=[(2, 2)])
+            EnvironmentDQN.evaluate_agent(grid_file, dynamics_file, [agent], iters, out_runs, 0.3, agent_start_pos=[(2, 2)])
             print(f'Was tested on: /DQN_models/model_updaterate{agent.target_update_freq}_gamma{agent.gamma}_alpha{agent.alpha}_{dyn[dynamics_file]}.pt')
 
             # Uncomment and modify the lines below as needed for additional evaluations

@@ -3,16 +3,15 @@
 This is an agent that takes a random action from the available action space.
 """
 import random
-from random import randint
 import numpy as np
-import math
-from agents import BaseAgent
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from collections import deque
 from pathlib import Path
+
+from agents import BaseAgent
 
 
 class DQN(nn.Module):
@@ -52,16 +51,19 @@ class DQN(nn.Module):
 
 
 class DQNAgent(BaseAgent):
-    def __init__(self, agent_number: int, gamma: float, grid_size: int, epsilon=0.4, alpha=0.001, target_update_freq = 1000):
+    def __init__(self, agent_number: int, gamma: float, grid_size: int, epsilon=0.4, alpha=0.001, 
+                 target_update_freq=1000, verbose=False):
         """
         Set agent parameters.
 
         Args:
-            agent_number: The index of the agent in the environment.
-            gamma: loss rate.
-            theta: minimal change.
-            epsilon: epsilon greedy
-            alpha: learning rate
+            agent_number (int): The index of the agent in the environment.
+            gamma (float): loss rate.
+            grid_size (int): number of spaces in the grid.
+            epsilon (float): epsilon greedy. Defaults to 0.4.
+            alpha (float): learning rate. Defaults to 0.001.
+            target_update_freq (int): per how many steps should the target network be updated. Defaults to 1000.
+            verbose (bool): report on internal operations. Defaults to False.
         """
 
         super().__init__(agent_number)
@@ -83,6 +85,7 @@ class DQNAgent(BaseAgent):
         self.target_update_freq = target_update_freq
         self.reward_buffer = deque(maxlen=1000)
         self.num_actions = 4
+        self.verbose = verbose
 
         # Agent information
         self.Q_network = DQN(self.grid_size, self.num_actions).to(self.device)
@@ -95,7 +98,6 @@ class DQNAgent(BaseAgent):
 
         # Agent learning infrastructure
         self.optimizer = optim.Adam(self.Q_network.parameters(), lr=self.alpha)
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
     def process_reward(self, pos: np.ndarray, reward: float, action: int, done: int):
@@ -148,7 +150,7 @@ class DQNAgent(BaseAgent):
 
             self.step = self.step + 1
             # Target network update step
-            if self.step % self.target_update_freq == 0:
+            if self.step % self.target_update_freq == 0 and self.verbose:
                 self.target_network.load_state_dict(self.Q_network.state_dict())
                 print(np.mean(self.reward_buffer))
                 print(self.step)
@@ -197,17 +199,22 @@ class DQNAgent(BaseAgent):
         with torch.no_grad():
             q_values = self.Q_network(self.state)
 
-        # print(q_values)
+        if self.verbose:
+            print(q_values)
         action = q_values.argmax(dim=1).item()
 
         return action
 
-    def save_model(self,Path):
+    def save_model(self, dynamic=True):
         """
         Save the trained Q network to the DQN_models folder with its settings.
-        """        
-        torch.save(self.Q_network.state_dict(), 
-                   Path("DQN_models/model_static_updaterate{}_gamma{}_alpha{}_dynamic.pt".format(self.target_update_freq, self.gamma, self.alpha)))
+        """
+        if dynamic:        
+            torch.save(self.Q_network.state_dict(), 
+                       Path(f"DQN_models/model_updaterate{self.target_update_freq}_gamma{self.gamma}_alpha{self.alpha}_dynamic.pt"))
+        else:
+            torch.save(self.Q_network.state_dict(), 
+                       Path(f"DQN_models/model_updaterate{self.target_update_freq}_gamma{self.gamma}_alpha{self.alpha}_static.pt"))    
 
 
     def load_model(self, model_path: str | Path):
@@ -217,5 +224,5 @@ class DQNAgent(BaseAgent):
         Args:
             model_path (str | Path): path to the saved model.
         """
-        self.Q_network.load_state_dict(torch.load(model_path))
+        self.Q_network.load_state_dict(torch.load(model_path, map_location=self.device))
     

@@ -1,13 +1,5 @@
 total_dirt_cleaned,total_steps,total_agent_moves,total_agents_at_charger,total_failed_moves,steps_per_dirt,failed_moves_fraction,total_reward,dirt_remaining,start,agent,room,sigma
-3,59,58,1,0,19.333333333333332,0.0,-30,0,"(2, 2)","ValueAgent(0, 0.9)",warehouse_stat_3.grd,0.0
-3,65,64,1,0,21.333333333333332,0.0,-36,0,"(2, 2)","ValueAgent(0, 0.9)",warehouse_stat_3.grd,0.25
-2,1000,1000,0,0,500.0,0.0,-988,1,"(2, 2)","ValueAgent(0, 0.6)",warehouse_stat_3.grd,0.0
-3,574,551,1,22,191.0,0.038394415357766144,-545,0,"(2, 2)","ValueAgent(0, 0.6)",warehouse_stat_3.grd,0.25
-5,63,62,1,0,12.4,0.0,-22,0,"(2, 2)","ValueAgent(0, 0.9)",warehouse_stat_5.grd,0.0
-5,73,72,1,0,14.4,0.0,-32,0,"(2, 2)","ValueAgent(0, 0.9)",warehouse_stat_5.grd,0.25
-5,63,62,1,0,12.4,0.0,-22,0,"(2, 2)","ValueAgent(0, 0.6)",warehouse_stat_5.grd,0.0
-5,73,72,1,0,14.4,0.0,-32,0,"(2, 2)","ValueAgent(0, 0.6)",warehouse_stat_5.grd,0.25
-8,83,82,1,0,10.25,0.0,-24,0,"(2, 2)","ValueAgent(0, 0.9)",warehouse_stat_8.grd,0.0
-8,91,90,1,0,11.25,0.0,-32,0,"(2, 2)","ValueAgent(0, 0.9)",warehouse_stat_8.grd,0.25
-8,95,94,1,0,11.75,0.0,-36,0,"(2, 2)","ValueAgent(0, 0.6)",warehouse_stat_8.grd,0.0
-8,91,90,1,0,11.25,0.0,-32,0,"(2, 2)","ValueAgent(0, 0.6)",warehouse_stat_8.grd,0.25
+3,64,63,1,0,21.0,0.0,-35,0,"(2, 2)","ValueAgent(0, 0.99)",warehouse_stat_3.grd,0
+3,168,165,1,2,55.666666666666664,0.011976047904191617,-139,0,"(2, 2)","ValueAgent(0, 0.7)",warehouse_stat_3.grd,0
+5,71,69,1,1,14.0,0.014285714285714285,-30,0,"(2, 2)","ValueAgent(0, 0.99)",warehouse_stat_5.grd,0
+5,71,69,1,1,14.0,0.014285714285714285,-30,0,"(2, 2)","ValueAgent(0, 0.7)",warehouse_stat_5.grd,0

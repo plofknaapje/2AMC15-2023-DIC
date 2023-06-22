@@ -1,11 +1,11 @@
-"""Random Agent.
+"""QLearn Agent.
 
-This is an agent that takes a random action from the available action space.
+This is an agent that learns using Q-learning.
 """
-import random
 from random import randint
 import numpy as np
 import math
+
 from agents import BaseAgent
 
 
@@ -116,7 +116,6 @@ class QLearnAgent(BaseAgent):
             return self.dirt_byte_converter(self.dirtGrid)
         
         dirty = False
-
 
 
         if quarter == 1:

@@ -3,11 +3,11 @@ Trains the Value Iteration Agent and reports the result.
 """
 from pathlib import Path
 from tqdm import trange
+import pandas as pd
 
 try:
     from agents.value_agent import ValueAgent
-
-    from world.environment_ref import Environment
+    from world import Environment
 
 except ModuleNotFoundError:
     import sys
@@ -21,21 +21,11 @@ except ModuleNotFoundError:
         sys.path.extend(root_path)
 
     from agents.value_agent import ValueAgent
-    from world.environment_ref import Environment
-
-import pandas as pd
+    from world import Environment
 
 
-def main(
-    grid_paths: list[Path],
-    no_gui: bool,
-    iters: int,
-    fps: int,
-    sigma: float,
-    out_runs: Path,
-    out_experiments: Path,
-    random_seed: int,
-):
+def main(grid_paths: list[Path], no_gui: bool, iters: int, fps: int, sigma: float, out_runs: Path, out_experiments: Path,
+         random_seed: int):
     """
     Function which trains and evaluate the ValueIteration agents.
 
@@ -55,16 +45,8 @@ def main(
         # Set up the environment and reset it to its initial state
         room_name = grid.name
 
-        env = Environment(
-            grid,
-            no_gui=no_gui,
-            n_agents=1,
-            agent_start_pos=None,
-            sigma=sigma,
-            target_fps=fps,
-            random_seed=random_seed,
-            reward_fn='custom',
-        )
+        env = Environment(grid, no_gui, n_agents=1, agent_start_pos=None, sigma=sigma, target_fps=fps, 
+                          random_seed=random_seed, reward_fn='custom')
         obs, info = env.get_observation()
         # Add agents with different configurations here
         agents = [
@@ -85,22 +67,21 @@ def main(
                 # If the agent is terminated, we reset the env.
                 if terminated:
                     obs, info, world_stats = env.reset()
+                    agent.reset()
                     break
                     
             obs, info, world_stats = env.reset()
+            agent.reset()
 
             # Add starting spaces here
-            starts = [(2, 2)]
-
-            for start in starts:
-                world_stats = Environment.evaluate_agent(
-                    grid, [agent], 1000, out_runs, sigma=0.0,
-                    agent_start_pos=[start], random_seed=0)
-                world_stats["start"] = start
-                world_stats["agent"] = str(agent)
-                world_stats["room"] = room_name
-                world_stats["sigma"] = sigma
-                results.append(world_stats)
+            start = (2, 2)
+            world_stats = Environment.evaluate_agent(grid, [agent], 1000, out_runs, sigma=0.1, agent_start_pos=[start], 
+                                                     random_seed=0)
+            world_stats["start"] = start
+            world_stats["agent"] = str(agent)
+            world_stats["room"] = room_name
+            world_stats["sigma"] = sigma
+            results.append(world_stats)
 
     results = pd.DataFrame.from_records(results)
     print(results)
@@ -108,15 +89,5 @@ def main(
 
 
 if __name__ == "__main__":
-    main(
-        grid_paths=[Path("grid_configs\warehouse_stat_3.grd"),
-                   Path("grid_configs\warehouse_stat_5.grd"),
-                   Path("grid_configs\warehouse_stat_8.grd")],
-        no_gui=True,
-        iters=10,
-        fps=10,
-        sigma=0,
-        out_runs=Path("results/"),
-        out_experiments=Path("experiments/"),
-        random_seed=0
-    )
+    main(grid_paths=[Path("grid_configs/warehouse_stat_3.grd"), Path("grid_configs/warehouse_stat_5.grd")], no_gui=True, 
+        iters=10, fps=10, sigma=0, out_runs=Path("results/"), out_experiments=Path("experiments/"), random_seed=0)
