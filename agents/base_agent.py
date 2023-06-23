@@ -18,14 +18,15 @@ class BaseAgent(ABC):
         self.agent_number = agent_number
 
     @abstractmethod
-    def process_reward(self, observation: np.ndarray, reward: float):
-        """
-        Any code that processes a reward given the observation is here.
+    def process_reward(self, observation: np.ndarray, reward: float, action: int, done: int):
+        """Any code that processes a reward given the observation is here.
 
         Args:
             observation (np.ndarray): The observation which is returned by the environment.
             reward (float): The float value which is returned by the environment as a
                 reward.
+            action: action that is done.
+            done: if done.
         """
         raise NotImplementedError
 
@@ -40,3 +41,6 @@ class BaseAgent(ABC):
                 in here as well as a dictionary.
         """
         raise NotImplementedError
+
+    def take_action_eval(self, observation: np.ndarray, info: None | dict):
+        pass

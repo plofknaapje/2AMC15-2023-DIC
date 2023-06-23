@@ -1,13 +1,22 @@
-# 2AMC15-2023-DIC
+# 2AMC15-2023-DIC Group 10
+In this repository, you will find all the code which we used for the second assignment. We used two different agents,
+Value Iteration and Deep Q-Learning. Both were run on our 5 dirt warehouse and we tested our DQN agent more by also 
+having it run in a dynamic environment. 
 
-Welcome to 2AMC15 Data Intelligence Challenge!.
-This is the repository containing the challenge environment code.
-
-## Quickstart
+## Repository setup
 
 Before running:
-Make sure you have the project running in a virtual environment (recomanded venv) and install the requirements.txt file:
+Make sure you have the project running in a virtual environment (recommended venv) and install the requirements.txt file.
+To do this, open a terminal window in this folder and run the following commands. 
 
+### Conda
+```commandline
+conda create -n DIC10           #conda users
+conda activate DIC10            #conda users
+pip install -r requirements.txt
+```
+
+### Venv
 ```commandline
 python3 -m venv venv
 source venv/bin/activate        #macOS/Linux
@@ -15,149 +24,42 @@ venv\Scripts\activate           #Windows
 pip install -r requirements.txt
 ```
 
-We implemented the following agents and coresponding train files:
-1. Value Iteration agent --> `train_value_iteration.py`
-2. Q-Learning agent --> `train_QLearning.py`
-3. Monte-Carlo agent --> `train_mc.py`
+### Verification
+Run the following command to check if all the required packages were installed:
+```commandline
+pip list
+```
 
-In order to run each you simply need to run each of the above mentioned `.py` files.
+## 
+We implemented the following agents and coresponding train files:
+1. Value Iteration agent --> `train_value_iteration.py` for both training and evaluation.
+2. Deep Q-Learning agent --> `train_DQN.py` for both training and evaluation and `evaluate_DQN.py` for just evaluation. 
+The Deep Q-Learning agent uses PyTorch and will use CUDA cores if your machine has them.
+
+In order to run each you simply need to run each of the above mentioned `.py` files in a terminal with the environment activated.
 ```commandline
 $ python train_value_iteration.py
-$ python train_QLearning.py
-$ python train_mc.py
+$ python train_DQN.py
+$ python evaluate_DQN.py
 ```
-You can also use the `train_optimal_paths.py` or `train_with_optimal_example.py` files to compare our agent's performance to the optimal path that each could take.
+You can also use the `train_optimal_paths.py` file to compare our agent's performance to the optimal path that the agent could take.
 ```commandline
 $ python train_optimal_paths.py
 ```
 
-## Original README follows:
+### Agent results
+The train files will store their results as CSV files in the `experiments` folder. We already preloaded those. Be aware
+that since we use a random factor in our environment (sigma=0.3), the results of the experiments are not deterministic.
+Each evaluation of the agent will also result in an image of the path and a text file in the `results` folder.
+The DQN models will be saved in the `DQN_models` folder after training. We already pretrained those.
 
-```bash
-usage: train.py [-h] [--no_gui] [--sigma SIGMA] [--fps FPS] [--iter ITER]
-                [--random_seed RANDOM_SEED] [--out OUT]
-                GRID [GRID ...]
-
-DIC Reinforcement Learning Trainer.
-
-positional arguments:
-  GRID                  Paths to the grid file to use. There can be more than
-                        one.
-
-options:
-  -h, --help            show this help message and exit
-  --no_gui              Disables rendering to train faster
-  --sigma SIGMA         Sigma value for the stochasticity of the environment.
-  --fps FPS             Frames per second to render at. Only used if no_gui is
-                        not set.
-  --iter ITER           Number of iterations to go through.
-  --random_seed RANDOM_SEED
-                        Random seed value for the environment.
-  --out OUT             Where to save training results.
-```
-## Code guide
-
-The code is made up of 3 modules: 
-
-1. `agent`
-2. `level_editor`
-3. `world`
-
-### The `agent` module
-
-The `agent` module contains the `BaseAgent` class as well as some benchmark agents to test against.
-
-The `BaseAgent` is an abstract class and all RL agents for DIC must inherit from/implement it.
-If you know/understand class inheritence, skip the following section
-
-#### `BaseAgent` as an abstract class
-Think of this like how all models in PyTorch start like 
-
-```python
-class NewModel(nn.Module):
-    def __init__(self):
-        super().__init__()
-    ...
-```
-
-In this case, `NewModel` inherits from `nn.Module`, which gives it the ability to do back propagation, store parameters, etc. without you having to manually code that every time.
-It also ensures that every class that inherits from `nn.Module` contains _at least_ the `forward()` method, which allows a forward pass to actually happen.
-
-In the case of your RL agent, inheriting from `BaseAgent` guarantees that your agent implements `process_reward()` and `take_action()`.
-This ensures that no matter what RL agent you make and however you code it, the environment and training code can always interact with it in the same way.
-Check out the benchmark agents to see examples.
-
-### The `level_editor` module
-
-The `level_editor` module contains a file called `app.py`.
-Run this file to make new levels.
-
-```bash
-$ python app.py
-```
-
-This will start up a web server where you can edit levels.
-To view the level editor itself, go to `127.0.0.1:5000`.
-All levels will be saved to the `grid_configs/` directory.
-
-Where the grids are saved can be changed in the file `level_editor/__init__.py`, but this is not recommended.
-
-We also provide a `grid_generator.py` file to generate random grids, found in `level_editor` directory.
-Usage is:
-
-```bash
-$ cd level_editor
-$ python grid_generator.py 
-
-usage: grid_generator.py [-h] N_GRIDS N_ROOMS FILE_PREFIX
-
-Randomly generate grids.
-
-positional arguments:
-  N_GRIDS      Number of grids to generate.
-  N_ROOMS      Number of rooms to generate in each grid.
-  FILE_PREFIX  Prefix to give to the generated file name.
-
-options:
-  -h, --help   show this help message and exit
-```
-
-### The `world` module
-
-The world module contains:
-1. `environment.py`
-2. `grid.py`
-3. `gui.py`
-
-#### The Environment
-
-The environment is very important because it contains everything we hold dear, including ourselves [^1].
-It is also the name of the class which our RL agent will act within.
-
-The main interaction with `Environment` is through the methods:
-
-- `Environment()` to initialize the environment
-- `get_observation()` to get an environment observation without taking a step or resetting the environment.
-- `reset()` to reset the environment
-- `step()` to actually take a time step with the environment.
-
-Explanations for each of these methods and how to use them can be found in the examples in the `environment.py` files and in the documentation in the code itself.
-
-[^1]: In case you missed it, this sentence is a joke. Please do not write all your code in the `Environment` class.
-
-#### The Grid
-
-The `Grid` class is the world on which the agents actually move.
-It is essentially a fancy Numpy array with different methods to make things easier for us to work with.
-
-#### The GUI
-
-The Graphical User Interface provides a way for you to actually see what the RL agent is doing.
-While performant and written using PyGame, it is still about 1300x slower than not running a GUI.
-Because of this, we recommend using it only while testing/debugging and not while training.
+## File structure and changes to the provided repository
+We kept the same overall file structure and added some things.
+We also created a second environment class, `EnvironmentDQN`, which is customised for the DQN agent. This environment
+also includes the functionality to have moving objects in the environment. We also implemented the posibility of giving
+the agent vision, but ended up no using this.
 
 ## Requirements
-
 - python ~= 3.10
 - numpy >= 1.24
 - tqdm ~= 4
@@ -166,4 +68,5 @@ Because of this, we recommend using it only while testing/debugging and not whil
 - flask-socketio ~= 5.3
 - pillow ~= 9.4
 - colorcet ~=3.0
-
+- pandas >= 2.0
+- pytorch

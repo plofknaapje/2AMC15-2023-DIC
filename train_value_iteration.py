@@ -3,11 +3,12 @@ Trains the Value Iteration Agent and reports the result.
 """
 from pathlib import Path
 from tqdm import trange
+import pandas as pd
 
 try:
-    # Add your agents here
     from agents.value_agent import ValueAgent
     from world import Environment
+
 except ModuleNotFoundError:
     import sys
     from os import pardir, path
@@ -22,31 +23,29 @@ except ModuleNotFoundError:
     from agents.value_agent import ValueAgent
     from world import Environment
 
-import pandas as pd
 
-
-def train(
-    grid_paths: list[Path],
-    no_gui: bool,
-    iters: int,
-    fps: int,
-    sigma: float,
-    out_runs: Path,
+def main(
+    grid_paths: list[Path], 
+    no_gui: bool, 
+    iters: int, 
+    fps: int, 
+    sigma: float, 
+    out_runs: Path, 
     out_experiments: Path,
-    random_seed: int,
+    random_seed: int
 ):
     """
-    Function which trains and evaluate the ValueIteration agents.
+    Function which trains and evaluate the ValueAgent agents.
 
     Args:
-        grid_paths (list[Path]): List of paths to the grids.
-        no_gui (bool): Should the training be done in the GUI?
-        iters (int): Number of iterations for training.
-        fps (int): Target fps for the GUI.
-        sigma (float): Sigma of the training environment.
-        out_runs (Path): Output dir for the results.
-        out_experiments (Path): Output dir for the experiment results.
-        random_seed (int): Seed for the random locations during training.
+        grid_paths (list[Path]): list of paths to the grids.
+        no_gui (bool): should the training be done in the GUI?
+        iters (int): number of iterations for training.
+        fps (int): yarget fps for the GUI.
+        sigma (float): sigma of the training environment.
+        out_runs (Path): output dir for the results.
+        out_experiments (Path): output dir for the experiment results.
+        random_seed (int): seed for the random locations during training.
     """
 
     results = []
@@ -54,22 +53,13 @@ def train(
         # Set up the environment and reset it to its initial state
         room_name = grid.name
 
-        env = Environment(
-            grid,
-            no_gui,
-            n_agents=1,
-            agent_start_pos=None,
-            sigma=sigma,
-            target_fps=fps,
-            random_seed=random_seed,
-            reward_fn='custom',
-        )
+        env = Environment(grid, no_gui, n_agents=1, agent_start_pos=None, sigma=sigma, target_fps=fps, 
+                          random_seed=random_seed, reward_fn='custom')
         obs, info = env.get_observation()
         # Add agents with different configurations here
         agents = [
-            # GreedyAgent(0),
-            ValueAgent(0, gamma=0.9),
-            ValueAgent(0, gamma=0.6)
+            ValueAgent(0, gamma=0.99),
+            ValueAgent(0, gamma=0.7)
         ]
 
         # Iterate through each agent for `iters` iterations
@@ -85,47 +75,34 @@ def train(
                 # If the agent is terminated, we reset the env.
                 if terminated:
                     obs, info, world_stats = env.reset()
+                    agent.reset()
                     break
-
-                agent.process_reward(obs, reward)
+                    
             obs, info, world_stats = env.reset()
+            agent.reset()
 
-            # Only go here AFTER training
-            print("")
-            print(str(agent))
             # Add starting spaces here
-            if room_name == "simple_grid.grd":
-                starts = [(1, 1), (8, 1), (1, 8), (8, 8)]
-            elif room_name == "multi_room.grd":
-                starts = [(1, 1), (8, 1), (1, 8), (8, 8)]
-            else:
-                raise ValueError("No valid room name!")
-
-            for start in starts:
-                for sigma in [0.0, 0.25]:
-                    print(f"{agent}, start={start}, sigma={sigma}")
-                    world_stats = Environment.evaluate_agent(
-                        grid, [agent], 1000, out_runs, sigma,
-                        agent_start_pos=[start], random_seed=0)
-                    world_stats["start"] = start
-                    world_stats["agent"] = str(agent)
-                    world_stats["room"] = room_name
-                    world_stats["sigma"] = sigma
-                    results.append(world_stats)
+            start = (2, 2)
+            world_stats = Environment.evaluate_agent(grid, [agent], 1000, out_runs, sigma=sigma, agent_start_pos=[start], 
+                                                     random_seed=0)
+            world_stats["start"] = start
+            world_stats["agent"] = str(agent)
+            world_stats["room"] = room_name
+            world_stats["sigma"] = sigma
+            results.append(world_stats)
 
     results = pd.DataFrame.from_records(results)
     results.to_csv(out_experiments / "value_iteration_results.csv", index=False)
 
 
 if __name__ == "__main__":
-    train(
-        grid_paths=[Path("grid_configs/simple_grid.grd"),
-                    Path("grid_configs/multi_room.grd")],
-        no_gui=True,
-        iters=100,
-        fps=10,
-        sigma=0,
-        out_runs=Path("results/"),
-        out_experiments=Path("experiments/"),
+    main(
+        grid_paths=[Path("grid_configs/warehouse_stat_3.grd"), Path("grid_configs/warehouse_stat_5.grd")], 
+        no_gui=True, 
+        iters=10, 
+        fps=10, 
+        sigma=0.3, 
+        out_runs=Path("results/"), 
+        out_experiments=Path("experiments/"), 
         random_seed=0
     )

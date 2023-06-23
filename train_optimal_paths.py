@@ -1,44 +1,35 @@
-"""Train.
-
-Train your RL Agent in this file.
-Feel free to modify this file as you need.
-
-In this example training script, we use command line arguments. Feel free to
-change this to however you want it to work.
+"""Optimal paths
+Calculates the optimal paths from the given start, through all the dirt to the charger for the given grids.
 """
 from pathlib import Path
-from optimal_path import optimal_path
+from world.optimal_path import optimal_path
 import pandas as pd
 
 
-def train(grid_paths: list[Path], out_experiments: Path):
+def main(
+    grid_paths: list[str], 
+    out_experiments: Path
+):
     """Main loop of the program."""
     results = {"room": [], "start_position": [], "path_length": []}
-    for grid_name in grid_paths:
-        grid = Path(grid_name)
-        room_name = grid_name.split("/")[1]
+    for grid in grid_paths:
+        room_name = grid.name
 
-        if room_name == "simple_grid.grd":
-            starts = [(1, 1), (8, 1), (1, 8), (8, 8)]
-        elif room_name == "multi_room.grd":
-            starts = [(1, 1), (8, 1), (1, 8), (8, 8)]
-        else:
-            raise ValueError("No valid room name!")
+        start_pos = (2,2)
 
-        for start_pos in starts:
-            optimal = optimal_path(grid, start_pos)
-            path_len = optimal[0]
-            start_pos = (start_pos[1], start_pos[0])
-            results["room"].append(room_name)
-            results["start_position"].append(start_pos)
-            results["path_length"].append(path_len)
+        optimal = optimal_path(grid, start_pos)
+        path_len = optimal[0]
+        start_pos = (start_pos[1], start_pos[0])
+        results["room"].append(room_name)
+        results["start_position"].append(start_pos)
+        results["path_length"].append(path_len)
 
     data = pd.DataFrame(results)
     data.to_csv(out_experiments / "optimal_path.csv", index=False)
 
 
 if __name__ == '__main__':
-    train(
-        grid_paths=["grid_configs/simple_grid.grd", "grid_configs/multi_room.grd"],
+    main(
+        grid_paths=[Path("grid_configs/warehouse_stat_3.grd"), Path("grid_configs/warehouse_stat_5.grd")],
         out_experiments=Path("experiments/")
     )

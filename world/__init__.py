@@ -1,5 +1,5 @@
 from world.grid import Grid
 from world.gui import EnvironmentGUI
-from world.environment import Environment
+from world.environment import Environment, EnvironmentDQN
 
-__all__ = ["Environment", "Grid", "EnvironmentGUI"]
+__all__ = ["Grid", "EnvironmentGUI", "Environment", "EnvironmentDQN"]
