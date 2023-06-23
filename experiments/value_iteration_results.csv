@@ -1,5 +1,5 @@
 total_dirt_cleaned,total_steps,total_agent_moves,total_agents_at_charger,total_failed_moves,steps_per_dirt,failed_moves_fraction,total_reward,dirt_remaining,start,agent,room,sigma
-3,73,71,1,1,24.0,0.013888888888888888,172,0,"(2, 2)","ValueAgent(0, 0.99)",warehouse_stat_3.grd,0.3
-3,339,327,1,11,112.66666666666667,0.03254437869822485,-184,0,"(2, 2)","ValueAgent(0, 0.7)",warehouse_stat_3.grd,0.3
 5,77,75,1,1,15.2,0.013157894736842105,270,0,"(2, 2)","ValueAgent(0, 0.99)",warehouse_stat_5.grd,0.3
 5,77,75,1,1,15.2,0.013157894736842105,270,0,"(2, 2)","ValueAgent(0, 0.7)",warehouse_stat_5.grd,0.3
+5,75,73,1,1,14.8,0.013513513513513514,272,0,"(2, 2)","ValueAgent(0, 0.99)",warehouse_dyn_5.grd,0.3
+5,75,73,1,1,14.8,0.013513513513513514,272,0,"(2, 2)","ValueAgent(0, 0.7)",warehouse_dyn_5.grd,0.3

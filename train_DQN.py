@@ -11,7 +11,7 @@ import pandas as pd
 
 try:
     from agents.DQNAgent import DQNAgent
-    from world import EnvironmentDQN
+    from world import Environment
 except ModuleNotFoundError:
     import sys
     from os import pardir, path
@@ -24,7 +24,7 @@ except ModuleNotFoundError:
         sys.path.extend(root_path)
 
     from agents.DQNAgent import DQNAgent
-    from world import EnvironmentDQN
+    from world import Environment
 
 
 def main(
@@ -58,7 +58,7 @@ def main(
         room_name = grid_file.name
 
         # Set up the environment and reset it to its initial state
-        env = EnvironmentDQN(grid_file, dynamics_file, no_gui, n_agents=1, agent_start_pos=None, sigma=0, reward_fn='custom',
+        env = Environment(grid_file, dynamics_file, no_gui, n_agents=1, agent_start_pos=None, sigma=0, reward_fn='custom',
                           target_fps=fps, random_seed=random_seed)
         _, info = env.get_observation()
 
@@ -115,7 +115,7 @@ def main(
                 # print(world_stats)
 
             info['iteration'] = 0
-            world_stats = EnvironmentDQN.evaluate_agent(grid_file, dynamics_file, [agent], 1000, out_runs, sigma, agent_start_pos=[(2, 2)])
+            world_stats = Environment.evaluate_agent(grid_file, dynamics_file, [agent], 1000, out_runs, sigma, agent_start_pos=[(2, 2)])
 
             if dynamics_file is None:
                 agent.save_model(dynamic=False)

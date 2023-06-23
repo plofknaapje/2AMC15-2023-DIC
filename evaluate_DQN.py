@@ -3,7 +3,7 @@ import pandas as pd
 
 try:
     from agents.DQNAgent import DQNAgent
-    from world.environment import EnvironmentDQN
+    from world.environment import Environment
 except ModuleNotFoundError:
     import sys
     from os import pardir, path
@@ -16,7 +16,7 @@ except ModuleNotFoundError:
         sys.path.extend(root_path)
 
     from agents.DQNAgent import DQNAgent
-    from world.environment import EnvironmentDQN
+    from world.environment import Environment
 
 def main(
     grid_paths: list[Path],
@@ -46,7 +46,7 @@ def main(
     for grid_file, dynamics_file in zip(grid_paths, dynamics_fp):
         room_name = grid_file.name
         # Set up the environment and reset it to its initial state
-        env = EnvironmentDQN(grid_file, dynamics_file, no_gui, n_agents=1, agent_start_pos=None, sigma=sigma,
+        env = Environment(grid_file, dynamics_file, no_gui, n_agents=1, agent_start_pos=None, sigma=sigma,
                              reward_fn='custom', target_fps=fps, random_seed=random_seed)
 
         # Set up the agents from scratch for every grid
@@ -86,7 +86,7 @@ def main(
                 continue
 
             # Evaluate the agent
-            world_stats = EnvironmentDQN.evaluate_agent(grid_file, dynamics_file, [agent], iters, out_runs, sigma, agent_start_pos=[(2, 2)])
+            world_stats = Environment.evaluate_agent(grid_file, dynamics_file, [agent], iters, out_runs, sigma, agent_start_pos=[(2, 2)])
             print(f'Was tested on: /DQN_models/model_updaterate{agent.target_update_freq}_gamma{agent.gamma}_alpha{agent.alpha}_{dyn}.pt')
 
             world_stats["start"] = (2, 2)

@@ -55,9 +55,8 @@ The DQN models will be saved in the `DQN_models` folder after training. We alrea
 
 ## File structure and changes to the provided repository
 We kept the same overall file structure and added some things.
-We also created a second environment class, `EnvironmentDQN`, which is customised for the DQN agent. This environment
-also includes the functionality to have moving objects in the environment. We also implemented the posibility of giving
-the agent vision, but ended up no using this.
+We added two features to the given environmnet: moving objects and agent vision.
+The moving objects can be programmed using a json file, examples can be found in `dynamic_env_config`, specifically `test.json`.
 
 ## Requirements
 - python ~= 3.10

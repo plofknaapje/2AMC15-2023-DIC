@@ -26,6 +26,7 @@ except ModuleNotFoundError:
 
 def main(
     grid_paths: list[Path], 
+    dynamics_paths: list[Path | None],
     no_gui: bool, 
     iters: int, 
     fps: int, 
@@ -39,6 +40,7 @@ def main(
 
     Args:
         grid_paths (list[Path]): list of paths to the grids.
+        dynamics_paths (list[Path | None]): lost of paths to the dynamics files. None means static.
         no_gui (bool): should the training be done in the GUI?
         iters (int): number of iterations for training.
         fps (int): yarget fps for the GUI.
@@ -49,11 +51,11 @@ def main(
     """
 
     results = []
-    for grid in grid_paths:
+    for grid, dynamics in zip(grid_paths, dynamics_paths):
         # Set up the environment and reset it to its initial state
         room_name = grid.name
 
-        env = Environment(grid, no_gui, n_agents=1, agent_start_pos=None, sigma=sigma, target_fps=fps, 
+        env = Environment(grid, None, no_gui, n_agents=1, agent_start_pos=None, sigma=sigma, target_fps=fps, 
                           random_seed=random_seed, reward_fn='custom')
         obs, info = env.get_observation()
         # Add agents with different configurations here
@@ -83,8 +85,8 @@ def main(
 
             # Add starting spaces here
             start = (2, 2)
-            world_stats = Environment.evaluate_agent(grid, [agent], 1000, out_runs, sigma=sigma, agent_start_pos=[start], 
-                                                     random_seed=0)
+            world_stats = Environment.evaluate_agent(grid, None, [agent], 1000, out_runs, sigma=sigma, agent_start_pos=[start], 
+                                                        random_seed=0, is_DQN=False)
             world_stats["start"] = start
             world_stats["agent"] = str(agent)
             world_stats["room"] = room_name
@@ -97,7 +99,8 @@ def main(
 
 if __name__ == "__main__":
     main(
-        grid_paths=[Path("grid_configs/warehouse_stat_3.grd"), Path("grid_configs/warehouse_stat_5.grd")], 
+        grid_paths=[Path("grid_configs/warehouse_stat_5.grd"), Path("grid_configs/warehouse_dyn_5.grd")], 
+        dynamics_paths=[None, Path("dynamic_env_config/test.json")],
         no_gui=True, 
         iters=10, 
         fps=10, 
