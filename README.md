@@ -1,13 +1,22 @@
 # 2AMC15-2023-DIC Group 10
 In this repository, you will find all the code which we used for the second assignment. We used two different agents,
-value iteration and Deep Q-Learning, 
+Value Iteration and Deep Q-Learning. Both were run on our 5 dirt warehouse and we tested our DQN agent more by also 
+having it run in a dynamic environment. 
 
-
-## Quickstart
+## Repository setup
 
 Before running:
-Make sure you have the project running in a virtual environment (recommended venv) and install the requirements.txt file:
+Make sure you have the project running in a virtual environment (recommended venv) and install the requirements.txt file.
+To do this, open a terminal window in this folder and run the following commands. 
 
+### Conda
+```commandline
+conda create -n DIC10           #conda users
+conda activate DIC10            #conda users
+pip install -r requirements.txt
+```
+
+### Venv
 ```commandline
 python3 -m venv venv
 source venv/bin/activate        #macOS/Linux
@@ -15,9 +24,17 @@ venv\Scripts\activate           #Windows
 pip install -r requirements.txt
 ```
 
+### Verification
+Run the following command to check if all the required packages were installed:
+```commandline
+pip list
+```
+
+## 
 We implemented the following agents and coresponding train files:
 1. Value Iteration agent --> `train_value_iteration.py` for both training and evaluation.
-2. Deep Q-Learning agent --> `train_DQN.py` for both training and evaluation and `evaluate_DQN.py` for just evaluation. Running this requires a machine with CUDA cores.
+2. Deep Q-Learning agent --> `train_DQN.py` for both training and evaluation and `evaluate_DQN.py` for just evaluation. 
+The Deep Q-Learning agent uses PyTorch and will use CUDA cores if your machine has them.
 
 In order to run each you simply need to run each of the above mentioned `.py` files in a terminal with the environment activated.
 ```commandline
@@ -31,17 +48,18 @@ $ python train_optimal_paths.py
 ```
 
 ### Agent results
-The train files will store their results as CSV files in the `experiments` folder. 
+The train files will store their results as CSV files in the `experiments` folder. We already preloaded those. Be aware
+that since we use a random factor in our environment (sigma=0.3), the results of the experiments are not deterministic.
 Each evaluation of the agent will also result in an image of the path and a text file in the `results` folder.
+The DQN models will be saved in the `DQN_models` folder after training. We already pretrained those.
 
 ## File structure and changes to the provided repository
-We kept the same overall file structure and added some things. We added a folder for storing the trained DQN models, 
-a folder for storing the results of the experiments and a folder with the configurations of our dynamic environment.
+We kept the same overall file structure and added some things.
 We also created a second environment class, `EnvironmentDQN`, which is customised for the DQN agent. This environment
-also includes the functionality to have moving objects in the environment. 
+also includes the functionality to have moving objects in the environment. We also implemented the posibility of giving
+the agent vision, but ended up no using this.
 
 ## Requirements
-
 - python ~= 3.10
 - numpy >= 1.24
 - tqdm ~= 4

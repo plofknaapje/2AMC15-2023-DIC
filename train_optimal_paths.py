@@ -6,7 +6,10 @@ from world.optimal_path import optimal_path
 import pandas as pd
 
 
-def main(grid_paths: list[str], out_experiments: Path):
+def main(
+    grid_paths: list[str], 
+    out_experiments: Path
+):
     """Main loop of the program."""
     results = {"room": [], "start_position": [], "path_length": []}
     for grid in grid_paths:
@@ -26,5 +29,7 @@ def main(grid_paths: list[str], out_experiments: Path):
 
 
 if __name__ == '__main__':
-    main(grid_paths=[Path("grid_configs/warehouse_stat_3.grd"), Path("grid_configs/warehouse_stat_5.grd")],
-        out_experiments=Path("experiments/"))
+    main(
+        grid_paths=[Path("grid_configs/warehouse_stat_3.grd"), Path("grid_configs/warehouse_stat_5.grd")],
+        out_experiments=Path("experiments/")
+    )

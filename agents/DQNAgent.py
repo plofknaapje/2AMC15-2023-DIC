@@ -216,7 +216,6 @@ class DQNAgent(BaseAgent):
             torch.save(self.Q_network.state_dict(), 
                        Path(f"DQN_models/model_updaterate{self.target_update_freq}_gamma{self.gamma}_alpha{self.alpha}_static.pt"))    
 
-
     def load_model(self, model_path: str | Path):
         """
         Load a trained Q network from the supplied path
@@ -225,4 +224,7 @@ class DQNAgent(BaseAgent):
             model_path (str | Path): path to the saved model.
         """
         self.Q_network.load_state_dict(torch.load(model_path, map_location=self.device))
+
+    def __str__(self):
+        return f"DQNAgent({self.agent_number}, {self.target_update_freq}, {self.gamma}, {self.alpha})"
     

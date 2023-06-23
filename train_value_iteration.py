@@ -24,20 +24,28 @@ except ModuleNotFoundError:
     from world import Environment
 
 
-def main(grid_paths: list[Path], no_gui: bool, iters: int, fps: int, sigma: float, out_runs: Path, out_experiments: Path,
-         random_seed: int):
+def main(
+    grid_paths: list[Path], 
+    no_gui: bool, 
+    iters: int, 
+    fps: int, 
+    sigma: float, 
+    out_runs: Path, 
+    out_experiments: Path,
+    random_seed: int
+):
     """
-    Function which trains and evaluate the ValueIteration agents.
+    Function which trains and evaluate the ValueAgent agents.
 
     Args:
-        grid_paths (list[Path]): List of paths to the grids.
-        no_gui (bool): Should the training be done in the GUI?
-        iters (int): Number of iterations for training.
-        fps (int): Target fps for the GUI.
-        sigma (float): Sigma of the training environment.
-        out_runs (Path): Output dir for the results.
-        out_experiments (Path): Output dir for the experiment results.
-        random_seed (int): Seed for the random locations during training.
+        grid_paths (list[Path]): list of paths to the grids.
+        no_gui (bool): should the training be done in the GUI?
+        iters (int): number of iterations for training.
+        fps (int): yarget fps for the GUI.
+        sigma (float): sigma of the training environment.
+        out_runs (Path): output dir for the results.
+        out_experiments (Path): output dir for the experiment results.
+        random_seed (int): seed for the random locations during training.
     """
 
     results = []
@@ -75,7 +83,7 @@ def main(grid_paths: list[Path], no_gui: bool, iters: int, fps: int, sigma: floa
 
             # Add starting spaces here
             start = (2, 2)
-            world_stats = Environment.evaluate_agent(grid, [agent], 1000, out_runs, sigma=0.1, agent_start_pos=[start], 
+            world_stats = Environment.evaluate_agent(grid, [agent], 1000, out_runs, sigma=sigma, agent_start_pos=[start], 
                                                      random_seed=0)
             world_stats["start"] = start
             world_stats["agent"] = str(agent)
@@ -84,10 +92,17 @@ def main(grid_paths: list[Path], no_gui: bool, iters: int, fps: int, sigma: floa
             results.append(world_stats)
 
     results = pd.DataFrame.from_records(results)
-    print(results)
     results.to_csv(out_experiments / "value_iteration_results.csv", index=False)
 
 
 if __name__ == "__main__":
-    main(grid_paths=[Path("grid_configs/warehouse_stat_3.grd"), Path("grid_configs/warehouse_stat_5.grd")], no_gui=True, 
-        iters=10, fps=10, sigma=0, out_runs=Path("results/"), out_experiments=Path("experiments/"), random_seed=0)
+    main(
+        grid_paths=[Path("grid_configs/warehouse_stat_3.grd"), Path("grid_configs/warehouse_stat_5.grd")], 
+        no_gui=True, 
+        iters=10, 
+        fps=10, 
+        sigma=0.3, 
+        out_runs=Path("results/"), 
+        out_experiments=Path("experiments/"), 
+        random_seed=0
+    )
